@@ -3,3 +3,6 @@ skynet.py
 Untitled-2.py
 ecosystem_sim\analysis_exports
 ecosystem_sim\saved_runs
+*.pkl
+*.json
+*.jsonl
