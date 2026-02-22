@@ -1,4 +1,3 @@
-# region Imports
 import random
 import colorsys
 import os
@@ -8,9 +7,6 @@ import sys
 import time
 import tracemalloc
 from datetime import datetime
-# endregion
-
-# region Global State And Configuration
 
 #genetic info
 species_id = []
@@ -71,17 +67,6 @@ alpha = 2.1
 
 aggresion_reward = 0.12#.4
 defense_cost = 0.004
-
-# initial trait distribution + simple trait-relations (preset controlled)
-initial_invasiveness_range = (0.4, 1.0)
-initial_mutation_rate_range = (0.05, 0.2)
-initial_defense_range = (0.0, 1.0)
-initial_offspring_fraction_range = (0.1, 0.9)
-initial_photosynthesis_range = (0.1, 1.0)
-initial_parasitism_range = (0.0, 0.5)
-photo_parasite_tradeoff = 0.0
-photo_invasive_tradeoff = 0.0
-defense_invasive_tradeoff = 0.0
 
 #records
 # History tracking for graphs
@@ -148,15 +133,6 @@ BASE_ENVIRONMENT = {
     "alpha": alpha,
     "aggresion_reward": aggresion_reward,
     "defense_cost": defense_cost,
-    "initial_invasiveness_range": initial_invasiveness_range,
-    "initial_mutation_rate_range": initial_mutation_rate_range,
-    "initial_defense_range": initial_defense_range,
-    "initial_offspring_fraction_range": initial_offspring_fraction_range,
-    "initial_photosynthesis_range": initial_photosynthesis_range,
-    "initial_parasitism_range": initial_parasitism_range,
-    "photo_parasite_tradeoff": photo_parasite_tradeoff,
-    "photo_invasive_tradeoff": photo_invasive_tradeoff,
-    "defense_invasive_tradeoff": defense_invasive_tradeoff,
 }
 
 ENVIRONMENT_PRESETS = {
@@ -197,109 +173,13 @@ ENVIRONMENT_PRESETS = {
         "aggresion_reward": 0.08,
         "defense_cost": 0.007,
     },
-    # Stylized Earth-like biosphere: high primary production + mixed strategies.
-    "earth_like": {
-        "sun_intensity": 10.0,
-        "solar_efficiency": 3.1,
-        "triat_costmultiplier": 2.9,
-        "invasiveness_bonus_multipliar": 0.0028,
-        "parasitism_flat_drain": 0.7,
-        "tau": 0.56,
-        "alpha": 1.45,
-        "aggresion_reward": 0.05,
-        "defense_cost": 0.009,
-        "initial_invasiveness_range": (0.15, 0.75),
-        "initial_mutation_rate_range": (0.03, 0.16),
-        "initial_defense_range": (0.15, 0.85),
-        "initial_offspring_fraction_range": (0.2, 0.75),
-        "initial_photosynthesis_range": (0.45, 1.0),
-        "initial_parasitism_range": (0.0, 0.35),
-        "photo_parasite_tradeoff": 0.65,
-        "photo_invasive_tradeoff": 0.35,
-        "defense_invasive_tradeoff": 0.25,
-    },
-    # Stylized Mars-like harsh world: low productivity, conflict-heavy survival.
-    "mars_harsh": {
-        "sun_intensity": 1.8,
-        "solar_efficiency": 1.1,
-        "triat_costmultiplier": 3.8,
-        "defence_cost_multipliar": 6.8,
-        "invasiveness_cost_multipliar": 2.6,
-        "invasiveness_bonus_multipliar": 0.0022,
-        "parasitism_cost_multiplier": 4.8,
-        "parasitism_flat_drain": 1.8,
-        "tau": 0.50,
-        "alpha": 1.9,
-        "aggresion_reward": 0.10,
-        "defense_cost": 0.010,
-        "initial_invasiveness_range": (0.35, 1.0),
-        "initial_mutation_rate_range": (0.02, 0.12),
-        "initial_defense_range": (0.35, 1.0),
-        "initial_offspring_fraction_range": (0.12, 0.55),
-        "initial_photosynthesis_range": (0.02, 0.35),
-        "initial_parasitism_range": (0.15, 0.85),
-        "photo_parasite_tradeoff": 0.45,
-        "photo_invasive_tradeoff": 0.20,
-        "defense_invasive_tradeoff": 0.10,
-    },
-    # Stylized deep-sea analog: low light, high scavenging/parasitism pressure.
-    "deep_sea": {
-        "sun_intensity": 0.35,
-        "solar_efficiency": 0.35,
-        "triat_costmultiplier": 3.0,
-        "defence_cost_multipliar": 6.2,
-        "invasiveness_cost_multipliar": 1.8,
-        "invasiveness_bonus_multipliar": 0.0020,
-        "parasitism_cost_multiplier": 3.6,
-        "parasitism_flat_drain": 1.6,
-        "tau": 0.60,
-        "alpha": 1.3,
-        "aggresion_reward": 0.04,
-        "defense_cost": 0.011,
-        "initial_invasiveness_range": (0.08, 0.60),
-        "initial_mutation_rate_range": (0.04, 0.20),
-        "initial_defense_range": (0.25, 0.95),
-        "initial_offspring_fraction_range": (0.15, 0.70),
-        "initial_photosynthesis_range": (0.0, 0.18),
-        "initial_parasitism_range": (0.20, 0.95),
-        "photo_parasite_tradeoff": 0.20,
-        "photo_invasive_tradeoff": 0.15,
-        "defense_invasive_tradeoff": 0.30,
-    },
-    # Stylized Proxima b analog: variable light + opportunistic mixed ecologies.
-    "proxima_b": {
-        "sun_intensity": 5.2,
-        "solar_efficiency": 1.9,
-        "triat_costmultiplier": 3.4,
-        "defence_cost_multipliar": 6.1,
-        "invasiveness_cost_multipliar": 2.2,
-        "invasiveness_bonus_multipliar": 0.0027,
-        "parasitism_cost_multiplier": 4.2,
-        "parasitism_flat_drain": 1.2,
-        "tau": 0.52,
-        "alpha": 1.8,
-        "aggresion_reward": 0.07,
-        "defense_cost": 0.009,
-        "initial_invasiveness_range": (0.20, 0.85),
-        "initial_mutation_rate_range": (0.03, 0.18),
-        "initial_defense_range": (0.20, 0.95),
-        "initial_offspring_fraction_range": (0.15, 0.75),
-        "initial_photosynthesis_range": (0.10, 0.75),
-        "initial_parasitism_range": (0.05, 0.65),
-        "photo_parasite_tradeoff": 0.55,
-        "photo_invasive_tradeoff": 0.25,
-        "defense_invasive_tradeoff": 0.20,
-    },
 }
 
-ENVIRONMENT_PRESET = "earth_like"
+ENVIRONMENT_PRESET = "symbiosis_tense"
 
 
 next_speciesID = 0
 parent_registry = {}
-# endregion
-
-# region Environment Controls
 
 def refresh_environment_derived_values():
     global max_sunenergy, base_tile_energy
@@ -328,15 +208,6 @@ def reset_energy_map():
         Energy_map[i] = max_sunenergy
 
 
-def sample_range(bounds):
-    lo, hi = bounds
-    if lo > hi:
-        lo, hi = hi, lo
-    return random.uniform(lo, hi)
-# endregion
-
-
-# region Organism Identity, Lifecycle, And Energy
 def generate_speciesID(parent_id = None):#parent id is essentially my id if i want to spreadd
     global next_speciesID
     speciesID = next_speciesID
@@ -375,26 +246,15 @@ def calc_BMR(hc_potency,inv_ness,p_ratio,parasitism_r):#subject to change by add
 
 def gen_initial_stats():
     id = generate_speciesID()
-    s_rate = sample_range(initial_invasiveness_range)
-    m_rate = sample_range(initial_mutation_rate_range)
-    hc_potency = sample_range(initial_defense_range)
-    ce_fraction = sample_range(initial_offspring_fraction_range)
-    p_ratio = sample_range(initial_photosynthesis_range)
+    s_rate = random.uniform(0.4,1)
+    m_rate = random.uniform(0.05,0.2)
+    hc_potency = random.uniform(0,1)
+    ce_fraction = random.uniform(0.1,0.9)
+    p_ratio = random.uniform(0.1,1)#for photosynthesis
     s_threshold = spread_energy_threshhold * random.uniform(0.9, 1.1)
     staring_point = random.randint(0,(Width * Width)-2)
     tile = None
-    p_rate = sample_range(initial_parasitism_range)
-
-    # Simple preset-controlled trait relations.
-    if photo_parasite_tradeoff > 0:
-        p_rate *= max(0.0, 1.0 - (photo_parasite_tradeoff * p_ratio))
-    if photo_invasive_tradeoff > 0 or defense_invasive_tradeoff > 0:
-        s_rate *= max(0.0, 1.0 - (photo_invasive_tradeoff * p_ratio) - (defense_invasive_tradeoff * hc_potency))
-
-    s_rate = max(0.01, min(1.0, s_rate))
-    p_ratio = max(0.0, min(1.0, p_ratio))
-    p_rate = max(0.0, min(1.0, p_rate))
-
+    p_rate = random.uniform(0, 0.5)#for parasitsm
     while World[staring_point] != None:
         staring_point = random.randint(0,(Width * Width)-2)
     tile = staring_point
@@ -657,10 +517,9 @@ def refresh_current_best():
         if Age[i] > current_best['age']:
             current_best['age'] = Age[i]
             current_best['age_index'] = i
-# endregion
+    
 
 #spread logic 
-# region Spread, Combat, And Mutation
 def reproduce(i, child_energy,new_tile):    
     # Apply mutation or not
     if random.random() <= mutation_rate[i]:
@@ -796,10 +655,8 @@ def mutate_color(parent,p_id):
         min(1,max(0,g + random.uniform(-drift,drift))),
         min(1,max(0,b + random.uniform(-drift,drift)))
     )
-# endregion
 
 
-# region Ecological Classification And Metrics
 def classify_guild_from_traits(photo, invasive, parasite):
     if parasite >= photo and parasite >= invasive and parasite >= 0.25:
         return "parasite"
@@ -927,11 +784,9 @@ def compute_observations(living, include_trait_corr=True):
         "attacker_win_rate": attacker_win_rate,
         "para_photo_ratio": para_photo_ratio,
     }
-# endregion
 
              
 #visualisations
-# region Visualization
 import tkinter as tk
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
@@ -1031,11 +886,9 @@ def setup_visualization():
 
     # Stats and debug text
     stats_ax = fig.add_subplot(2, 3, 3)
-    stats_ax.set_title("Records / Health / Last Tick")
     stats_ax.axis('off')  # Hide axes for text display
     stats_text = stats_ax.text(0.05, 0.95, '', transform=stats_ax.transAxes,
-                            fontsize=7, verticalalignment='top', family='monospace',
-                            clip_on=True)
+                            fontsize=7, verticalalignment='top', family='monospace')
 
     age_ax = fig.add_subplot(2, 3, 6)
     age_ax.set_title("Age Structure Distribution")
@@ -1045,10 +898,7 @@ def setup_visualization():
     debug_ax = stats_ax
     debug_ax.axis('off')
     debug_text = debug_ax.text(0.05, 0.05, '', transform=debug_ax.transAxes,
-                            fontsize=7, verticalalignment='top', family='monospace',
-                            clip_on=True)
-    stats_text.set_clip_path(stats_ax.patch)
-    debug_text.set_clip_path(debug_ax.patch)
+                            fontsize=8, verticalalignment='top', family='monospace')
     
     photo_line, = trait_ax.plot([], [], 'g-', label='Photosynthesis')
     defense_line, = trait_ax.plot([], [], 'b-', label='Defense')
@@ -1100,7 +950,6 @@ def cleanup_extinct_lineage():
             del parent_registry[s_id]
 
 
-# region Spatial Rendering Helpers
 def get_species_rgb(species_id, age, max_age):
     color_data = species_color[species_id]
     hue = color_data['base_hue']  # Use base_hue for consistent lineage color
@@ -1146,11 +995,8 @@ def build_spatial_layers():
     energy_map_arr = np.clip(energy_map_arr, 0, 1)
     biome_map_arr = np.clip(biome_map_arr, 0, 1)
     return world_array, energy_map_arr, biome_map_arr
-# endregion
-# endregion
 
 
-# region Run Recording, Persistence, And Analysis Export
 def reset_run_recording():
     global current_run_frames, current_capture_step
     current_run_frames = []
@@ -1388,17 +1234,7 @@ def export_ai_analysis_bundle(run_name, saved_run_path, tick_profiles, snapshot=
             "defense_cost": defense_cost,
             "tau": tau,
             "alpha": alpha,
-            "initial_invasiveness_range": initial_invasiveness_range,
-            "initial_mutation_rate_range": initial_mutation_rate_range,
-            "initial_defense_range": initial_defense_range,
-            "initial_offspring_fraction_range": initial_offspring_fraction_range,
-            "initial_photosynthesis_range": initial_photosynthesis_range,
-            "initial_parasitism_range": initial_parasitism_range,
-            "photo_parasite_tradeoff": photo_parasite_tradeoff,
-            "photo_invasive_tradeoff": photo_invasive_tradeoff,
-            "defense_invasive_tradeoff": defense_invasive_tradeoff,
         },
-        "preset_options": ENVIRONMENT_PRESETS,
         "preset_options_for_symbiosis": ENVIRONMENT_PRESETS,
         "interesting_ticks": interesting_ticks,
         "timing_hotspots_ms": hotspot_summary,
@@ -1431,10 +1267,8 @@ def export_ai_analysis_bundle(run_name, saved_run_path, tick_profiles, snapshot=
         "tick_profile_path": tick_profile_path,
         "code_snapshot_path": code_snapshot_path,
     }
-# endregion
 
 
-# region Replay Controls
 def start_replay(run_index=-1):
     global replay_mode, replay_run_index, replay_frame_index, replay_playing
     if not run_archive:
@@ -1587,10 +1421,8 @@ def on_replay_next_frame(event=None):
         replay_playing = False
         frame_count = len(run_archive[replay_run_index]["frames"])
         replay_frame_index = (replay_frame_index + 1) % frame_count
-# endregion
 
 
-# region Simulation Execution And Statistics
 def run_headless_simulation(total_ticks):
     global previous_tile_species
     reset_run_recording()
@@ -1853,11 +1685,9 @@ def generate_debug_text():
     text += f"Runs Saved: {len(run_archive)}\n"
     text += "Controls: S save | O load latest file | R replay | L stop replay | Space pause | <- -> step"
     return text
-# endregion
 
 
 
-# region App Startup
 def start():
     apply_environment_preset(ENVIRONMENT_PRESET)
     build_neighbor_cache()
@@ -1876,9 +1706,10 @@ def start():
     setup_visualization()
     start_replay(-1)
     update_visualization()
-# endregion
+    
 
-# region Spatial Utilities
+
+#helper functions
 def find_neighbour1D(tile :int):
     if not neighbor_cache or len(neighbor_cache) != (Width * Width):
         build_neighbor_cache()
@@ -1906,9 +1737,7 @@ def build_neighbor_cache():
         if tile + Width < Width * Width:
             cache[tile].append(tile + Width)
     neighbor_cache = [tuple(nbrs) for nbrs in cache]
-# endregion
 
-# region Entrypoint
 STARTUP_MODE = "simulate"  # "simulate" or "replay_latest"
 
 if __name__ == "__main__":
@@ -1918,4 +1747,3 @@ if __name__ == "__main__":
     else:
         start()
         main_window.mainloop()
-# endregion
