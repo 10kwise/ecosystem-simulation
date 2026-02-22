@@ -34,7 +34,7 @@ alive_indices = set()
 
 #the world variables 
 
-Width = 100
+Width = 500
 
 sun_intensity = 8
 max_sunenergy = sun_intensity * 2
@@ -319,7 +319,7 @@ ENVIRONMENT_PRESETS = {
     },
 }
 
-ENVIRONMENT_PRESET = "earth_like"
+ENVIRONMENT_PRESET = "deep_sea"
 
 
 next_speciesID = 0
@@ -452,6 +452,7 @@ free_slot = []
 
 def kill_organism(i):
     victim_tile = tile_of[i]
+    Energy_map[victim_tile] += Energy[i]
     Alive[i] = False
     alive_indices.discard(i)
     World[victim_tile] = None
@@ -538,9 +539,9 @@ def calculate_size_based_max_energy(i):
     size_factor = (
         0.35
         + (1.00 * d)
-        + (0.25 * p)
+        + (0.55 * p)
         + (0.40 * inv)
-        - (0.50 * para)
+        + (0.30 * para)
         + (0.25 * spread_norm)
         + (0.20 * off)
         - (0.15 * mut)
@@ -564,15 +565,13 @@ def calculate_energychange(i):
     global Energy_map, Energy, tick_total_gain, tick_total_bmr, tick_metabolism_count
 
     tile = tile_of[i]
-    tile_e = Energy_map[tile]
-    brightness = tile_e/base_tile_energy
+    brightness = Energy_map[tile]/base_tile_energy
     gain = max_sunenergy * photosynthetic_ratio[i] * brightness
-    if gain > 0:
-        Energy_map[tile] -= gain
-        Energy[i] += gain - basalmetabolicrate[i]
-        tick_total_gain += gain
-        tick_total_bmr += basalmetabolicrate[i]
-        tick_metabolism_count += 1
+    Energy_map[tile] -= gain
+    Energy[i] += gain - basalmetabolicrate[i]
+    tick_total_gain += gain
+    tick_total_bmr += basalmetabolicrate[i]
+    tick_metabolism_count += 1
 
 def calculate_parasitism(parasite_idx):
     global tick_parasitism_income

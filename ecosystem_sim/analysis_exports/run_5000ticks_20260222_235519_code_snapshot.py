@@ -319,7 +319,7 @@ ENVIRONMENT_PRESETS = {
     },
 }
 
-ENVIRONMENT_PRESET = "earth_like"
+ENVIRONMENT_PRESET = "proxima_b"
 
 
 next_speciesID = 0
@@ -452,6 +452,7 @@ free_slot = []
 
 def kill_organism(i):
     victim_tile = tile_of[i]
+    Energy_map[victim_tile] += Energy[i]
     Alive[i] = False
     alive_indices.discard(i)
     World[victim_tile] = None
@@ -564,15 +565,13 @@ def calculate_energychange(i):
     global Energy_map, Energy, tick_total_gain, tick_total_bmr, tick_metabolism_count
 
     tile = tile_of[i]
-    tile_e = Energy_map[tile]
-    brightness = tile_e/base_tile_energy
+    brightness = Energy_map[tile]/base_tile_energy
     gain = max_sunenergy * photosynthetic_ratio[i] * brightness
-    if gain > 0:
-        Energy_map[tile] -= gain
-        Energy[i] += gain - basalmetabolicrate[i]
-        tick_total_gain += gain
-        tick_total_bmr += basalmetabolicrate[i]
-        tick_metabolism_count += 1
+    Energy_map[tile] -= gain
+    Energy[i] += gain - basalmetabolicrate[i]
+    tick_total_gain += gain
+    tick_total_bmr += basalmetabolicrate[i]
+    tick_metabolism_count += 1
 
 def calculate_parasitism(parasite_idx):
     global tick_parasitism_income

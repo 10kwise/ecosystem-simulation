@@ -34,7 +34,7 @@ alive_indices = set()
 
 #the world variables 
 
-Width = 100
+Width = 50
 
 sun_intensity = 8
 max_sunenergy = sun_intensity * 2
@@ -148,8 +148,6 @@ BASE_ENVIRONMENT = {
     "alpha": alpha,
     "aggresion_reward": aggresion_reward,
     "defense_cost": defense_cost,
-    "base_energyconsumption": base_energyconsumption,
-    "spread_energy_threshhold": spread_energy_threshhold,
     "initial_invasiveness_range": initial_invasiveness_range,
     "initial_mutation_rate_range": initial_mutation_rate_range,
     "initial_defense_range": initial_defense_range,
@@ -248,27 +246,25 @@ ENVIRONMENT_PRESETS = {
     "deep_sea": {
         "sun_intensity": 0.35,
         "solar_efficiency": 0.35,
-        "triat_costmultiplier": 2.2,
-        "defence_cost_multipliar": 5.2,
-        "invasiveness_cost_multipliar": 1.4,
-        "invasiveness_bonus_multipliar": 0.0015,
-        "parasitism_cost_multiplier": 2.8,
-        "parasitism_flat_drain": 1.0,
-        "base_energyconsumption": 0.45,
-        "spread_energy_threshhold": initial_energy * 0.75,
+        "triat_costmultiplier": 3.0,
+        "defence_cost_multipliar": 6.2,
+        "invasiveness_cost_multipliar": 1.8,
+        "invasiveness_bonus_multipliar": 0.0020,
+        "parasitism_cost_multiplier": 3.6,
+        "parasitism_flat_drain": 1.6,
         "tau": 0.60,
         "alpha": 1.3,
         "aggresion_reward": 0.04,
-        "defense_cost": 0.010,
-        "initial_invasiveness_range": (0.02, 0.30),
-        "initial_mutation_rate_range": (0.05, 0.24),
-        "initial_defense_range": (0.0, 0.45),
-        "initial_offspring_fraction_range": (0.08, 0.45),
+        "defense_cost": 0.011,
+        "initial_invasiveness_range": (0.08, 0.60),
+        "initial_mutation_rate_range": (0.04, 0.20),
+        "initial_defense_range": (0.25, 0.95),
+        "initial_offspring_fraction_range": (0.15, 0.70),
         "initial_photosynthesis_range": (0.0, 0.18),
-        "initial_parasitism_range": (0.03, 0.45),
-        "photo_parasite_tradeoff": 0.12,
-        "photo_invasive_tradeoff": 0.08,
-        "defense_invasive_tradeoff": 0.18,
+        "initial_parasitism_range": (0.20, 0.95),
+        "photo_parasite_tradeoff": 0.20,
+        "photo_invasive_tradeoff": 0.15,
+        "defense_invasive_tradeoff": 0.30,
     },
     # Stylized Proxima b analog: variable light + opportunistic mixed ecologies.
     "proxima_b": {
@@ -319,7 +315,7 @@ ENVIRONMENT_PRESETS = {
     },
 }
 
-ENVIRONMENT_PRESET = "earth_like"
+ENVIRONMENT_PRESET = "deep_sea"
 
 
 next_speciesID = 0
@@ -338,7 +334,7 @@ def apply_environment_preset(name):
     global sun_intensity, solar_efficiency, triat_costmultiplier, defence_cost_multipliar
     global invasiveness_cost_multipliar, invasiveness_bonus_multipliar
     global parasitism_cost_multiplier, parasitism_flat_drain, tau, alpha
-    global aggresion_reward, defense_cost, base_energyconsumption, spread_energy_threshhold
+    global aggresion_reward, defense_cost
 
     if name not in ENVIRONMENT_PRESETS:
         raise ValueError(f"Unknown environment preset: {name}")
@@ -452,6 +448,7 @@ free_slot = []
 
 def kill_organism(i):
     victim_tile = tile_of[i]
+    Energy_map[victim_tile] += Energy[i]
     Alive[i] = False
     alive_indices.discard(i)
     World[victim_tile] = None
@@ -526,26 +523,9 @@ def instance(i):#currently working on this is the main loop
     else:
         kill_organism(i)
 def calculate_size_based_max_energy(i):
-    # Body size/storage is trait-composite: every trait contributes.
-    p = photosynthetic_ratio[i]
-    d = home_court_potency[i]
-    inv = invasiveness[i]
-    para = parasitism_rate[i]
-    mut = mutation_rate[i]
-    off = offspring_energy_fraction[i]
-    spread_norm = spread_threshold[i] / max(initial_energy * 5.0, 1.0)
-
-    size_factor = (
-        0.35
-        + (1.00 * d)
-        + (0.25 * p)
-        + (0.40 * inv)
-        - (0.50 * para)
-        + (0.25 * spread_norm)
-        + (0.20 * off)
-        - (0.15 * mut)
-    )
-    size_factor = max(0.20, min(3.20, size_factor))
+    # Larger defense = larger organism = more storage
+    # Could also factor in age: older = larger
+    size_factor = 1.0 + (home_court_potency[i] * 2.0)  # 1.0 to 3.0 range
     return initial_energy * size_factor
 
 def handle_overflow(i):
@@ -564,15 +544,13 @@ def calculate_energychange(i):
     global Energy_map, Energy, tick_total_gain, tick_total_bmr, tick_metabolism_count
 
     tile = tile_of[i]
-    tile_e = Energy_map[tile]
-    brightness = tile_e/base_tile_energy
+    brightness = Energy_map[tile]/base_tile_energy
     gain = max_sunenergy * photosynthetic_ratio[i] * brightness
-    if gain > 0:
-        Energy_map[tile] -= gain
-        Energy[i] += gain - basalmetabolicrate[i]
-        tick_total_gain += gain
-        tick_total_bmr += basalmetabolicrate[i]
-        tick_metabolism_count += 1
+    Energy_map[tile] -= gain
+    Energy[i] += gain - basalmetabolicrate[i]
+    tick_total_gain += gain
+    tick_total_bmr += basalmetabolicrate[i]
+    tick_metabolism_count += 1
 
 def calculate_parasitism(parasite_idx):
     global tick_parasitism_income
@@ -1429,8 +1407,6 @@ def export_ai_analysis_bundle(run_name, saved_run_path, tick_profiles, snapshot=
             "triat_costmultiplier": triat_costmultiplier,
             "invasiveness_bonus_multipliar": invasiveness_bonus_multipliar,
             "parasitism_flat_drain": parasitism_flat_drain,
-            "base_energyconsumption": base_energyconsumption,
-            "spread_energy_threshhold": spread_energy_threshhold,
             "aggresion_reward": aggresion_reward,
             "defense_cost": defense_cost,
             "tau": tau,
