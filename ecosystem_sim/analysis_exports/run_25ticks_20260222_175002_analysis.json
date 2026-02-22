@@ -1,0 +1,442 @@
+{
+  "run_name": "run_25ticks_20260222_175002",
+  "created_at": "2026-02-22T17:50:02",
+  "source_file": "C:\\Users\\ADMIN\\Documents\\mr hacker man\\ecosystem_sim\\grid fungi simulation.py",
+  "saved_run_path": "C:\\Users\\ADMIN\\Documents\\mr hacker man\\ecosystem_sim\\saved_runs\\run_25ticks_20260222_175002.pkl",
+  "tick_profile_path": "C:\\Users\\ADMIN\\Documents\\mr hacker man\\ecosystem_sim\\analysis_exports\\run_25ticks_20260222_175002_tick_profile.jsonl",
+  "environment_preset": "symbiosis_soft_competition",
+  "config": {
+    "Width": 50,
+    "run_ticks": 5000,
+    "FRAME_CAPTURE_STRIDE": 5,
+    "MAX_REPLAY_FRAMES": 2000,
+    "sun_intensity": 9.0,
+    "solar_efficiency": 2.9,
+    "triat_costmultiplier": 2.8,
+    "invasiveness_bonus_multipliar": 0.0025,
+    "parasitism_flat_drain": 0.8,
+    "aggresion_reward": 0.05,
+    "defense_cost": 0.01,
+    "tau": 0.58,
+    "alpha": 1.4
+  },
+  "preset_options_for_symbiosis": {
+    "baseline": {},
+    "symbiosis_soft_competition": {
+      "sun_intensity": 9.0,
+      "solar_efficiency": 2.9,
+      "triat_costmultiplier": 2.8,
+      "invasiveness_bonus_multipliar": 0.0025,
+      "parasitism_flat_drain": 0.8,
+      "tau": 0.58,
+      "alpha": 1.4,
+      "aggresion_reward": 0.05,
+      "defense_cost": 0.01
+    },
+    "symbiosis_patchy": {
+      "sun_intensity": 8.0,
+      "solar_efficiency": 2.8,
+      "triat_costmultiplier": 3.0,
+      "invasiveness_bonus_multipliar": 0.003,
+      "parasitism_flat_drain": 1.1,
+      "tau": 0.55,
+      "alpha": 1.6,
+      "aggresion_reward": 0.07,
+      "defense_cost": 0.008
+    },
+    "symbiosis_tense": {
+      "sun_intensity": 8.5,
+      "solar_efficiency": 2.7,
+      "triat_costmultiplier": 3.1,
+      "invasiveness_bonus_multipliar": 0.0035,
+      "parasitism_flat_drain": 1.4,
+      "tau": 0.53,
+      "alpha": 1.7,
+      "aggresion_reward": 0.08,
+      "defense_cost": 0.007
+    }
+  },
+  "interesting_ticks": {
+    "slowest_tick": {
+      "tick": 8,
+      "population": 1435,
+      "total_energy": 142550.46511475756,
+      "richness": 1435,
+      "shannon": 7.268920128193506,
+      "evenness": 0.9999999999999704,
+      "energy_gini": 0.23807055386577405,
+      "territory_stability": 0.9944,
+      "attacker_win_rate": 0.3333333333333333,
+      "para_photo_ratio": 0.06491319816785436,
+      "timing_ms": {
+        "instance": 579.3409000616521,
+        "spread": 1.163999899290502,
+        "energy_map": 24.924000026658177,
+        "refresh_best": 2.592800068669021,
+        "collect_stats": 376.49930000770837,
+        "build_layers": 0.0,
+        "capture_frame": 0.0,
+        "loop_total": 984.5210000639781
+      }
+    },
+    "max_inequality_tick": {
+      "tick": 24,
+      "population": 1144,
+      "total_energy": 90879.10585798077,
+      "richness": 1144,
+      "shannon": 7.042286171939895,
+      "evenness": 1.0000000000000215,
+      "energy_gini": 0.3374628230917168,
+      "territory_stability": 0.9872,
+      "attacker_win_rate": 0.6666666666666666,
+      "para_photo_ratio": 0.047787855425603994,
+      "timing_ms": {
+        "instance": 92.882200027816,
+        "spread": 0.649099936708808,
+        "energy_map": 6.987900007516146,
+        "refresh_best": 0.9082000469788909,
+        "collect_stats": 116.96320003829896,
+        "build_layers": 0.0,
+        "capture_frame": 0.0,
+        "loop_total": 218.3906000573188
+      }
+    },
+    "max_diversity_tick": {
+      "tick": 1,
+      "population": 1462,
+      "total_energy": 178824.106678996,
+      "richness": 1462,
+      "shannon": 7.287560640309962,
+      "evenness": 1.0000000000000329,
+      "energy_gini": 0.1947771060385888,
+      "territory_stability": 0.8892,
+      "attacker_win_rate": 0.3299492385786802,
+      "para_photo_ratio": 0.028445910674470453,
+      "timing_ms": {
+        "instance": 109.84990000724792,
+        "spread": 42.29619994293898,
+        "energy_map": 8.284399984404445,
+        "refresh_best": 1.28180009778589,
+        "collect_stats": 160.82700004335493,
+        "build_layers": 0.0,
+        "capture_frame": 0.0,
+        "loop_total": 322.53930007573217
+      }
+    },
+    "max_parasitism_pressure_tick": {
+      "tick": 2,
+      "population": 1460,
+      "total_energy": 168749.6873167805,
+      "richness": 1460,
+      "shannon": 7.2861917147025705,
+      "evenness": 1.0000000000000258,
+      "energy_gini": 0.20500922382271242,
+      "territory_stability": 0.996,
+      "attacker_win_rate": 0.8,
+      "para_photo_ratio": 0.1391778257978668,
+      "timing_ms": {
+        "instance": 170.37479998543859,
+        "spread": 0.8758000330999494,
+        "energy_map": 14.423100044950843,
+        "refresh_best": 2.231899998150766,
+        "collect_stats": 151.0083000175655,
+        "build_layers": 0.0,
+        "capture_frame": 0.0,
+        "loop_total": 338.91390007920563
+      }
+    },
+    "lowest_population_tick": {
+      "tick": 25,
+      "population": 1116,
+      "total_energy": 88887.15589734423,
+      "richness": 1116,
+      "shannon": 7.017506142941138,
+      "evenness": 0.9999999999999831,
+      "energy_gini": 0.33674546613647127,
+      "territory_stability": 0.9876,
+      "attacker_win_rate": 0.2,
+      "para_photo_ratio": 0.04607325247195697,
+      "timing_ms": {
+        "instance": 111.7773000150919,
+        "spread": 0.9321999968960881,
+        "energy_map": 10.585800046101213,
+        "refresh_best": 1.6818000003695488,
+        "collect_stats": 112.11550002917647,
+        "build_layers": 102.21269994508475,
+        "capture_frame": 1.1594999814406037,
+        "loop_total": 340.4648000141606
+      }
+    }
+  },
+  "timing_hotspots_ms": {
+    "instance": {
+      "avg_ms": 210.23381200619042,
+      "max_ms": 579.3409000616521,
+      "p95_ms": 368.33630001638085
+    },
+    "spread": {
+      "avg_ms": 2.6260519912466407,
+      "max_ms": 42.29619994293898,
+      "p95_ms": 1.8772000912576914
+    },
+    "energy_map": {
+      "avg_ms": 13.86592400725931,
+      "max_ms": 26.63629991002381,
+      "p95_ms": 24.472199962474406
+    },
+    "refresh_best": {
+      "avg_ms": 1.7810720019042492,
+      "max_ms": 3.7853000685572624,
+      "p95_ms": 3.7058000452816486
+    },
+    "collect_stats": {
+      "avg_ms": 171.48858800530434,
+      "max_ms": 376.49930000770837,
+      "p95_ms": 297.01680003199726
+    },
+    "build_layers": {
+      "avg_ms": 40.67336000036448,
+      "max_ms": 410.46640009153634,
+      "p95_ms": 179.09119999967515
+    },
+    "capture_frame": {
+      "avg_ms": 0.39686799980700016,
+      "max_ms": 2.836500061675906,
+      "p95_ms": 2.087599947117269
+    },
+    "loop_total": {
+      "avg_ms": 441.06567601207644,
+      "max_ms": 984.5210000639781,
+      "p95_ms": 695.8387000486255
+    }
+  },
+  "expensive_spots_ranked": [
+    {
+      "phase": "loop_total",
+      "avg_ms": 441.06567601207644,
+      "max_ms": 984.5210000639781,
+      "p95_ms": 695.8387000486255
+    },
+    {
+      "phase": "instance",
+      "avg_ms": 210.23381200619042,
+      "max_ms": 579.3409000616521,
+      "p95_ms": 368.33630001638085
+    },
+    {
+      "phase": "collect_stats",
+      "avg_ms": 171.48858800530434,
+      "max_ms": 376.49930000770837,
+      "p95_ms": 297.01680003199726
+    },
+    {
+      "phase": "build_layers",
+      "avg_ms": 40.67336000036448,
+      "max_ms": 410.46640009153634,
+      "p95_ms": 179.09119999967515
+    },
+    {
+      "phase": "energy_map",
+      "avg_ms": 13.86592400725931,
+      "max_ms": 26.63629991002381,
+      "p95_ms": 24.472199962474406
+    },
+    {
+      "phase": "spread",
+      "avg_ms": 2.6260519912466407,
+      "max_ms": 42.29619994293898,
+      "p95_ms": 1.8772000912576914
+    },
+    {
+      "phase": "refresh_best",
+      "avg_ms": 1.7810720019042492,
+      "max_ms": 3.7853000685572624,
+      "p95_ms": 3.7058000452816486
+    },
+    {
+      "phase": "capture_frame",
+      "avg_ms": 0.39686799980700016,
+      "max_ms": 2.836500061675906,
+      "p95_ms": 2.087599947117269
+    }
+  ],
+  "memory_sinks_ranked": [
+    {
+      "name": "current_run_frames_arrays",
+      "bytes": 100000,
+      "mb": 0.0954
+    },
+    {
+      "name": "species_color_dict",
+      "bytes": 73808,
+      "mb": 0.0704
+    },
+    {
+      "name": "parent_registry_dict",
+      "bytes": 73808,
+      "mb": 0.0704
+    },
+    {
+      "name": "World",
+      "bytes": 40056,
+      "mb": 0.0382
+    },
+    {
+      "name": "Energy_map",
+      "bytes": 40056,
+      "mb": 0.0382
+    },
+    {
+      "name": "Alive",
+      "bytes": 24424,
+      "mb": 0.0233
+    },
+    {
+      "name": "Energy",
+      "bytes": 24424,
+      "mb": 0.0233
+    },
+    {
+      "name": "tile_of",
+      "bytes": 24424,
+      "mb": 0.0233
+    },
+    {
+      "name": "Age",
+      "bytes": 24424,
+      "mb": 0.0233
+    },
+    {
+      "name": "species_id",
+      "bytes": 24424,
+      "mb": 0.0233
+    },
+    {
+      "name": "invasiveness",
+      "bytes": 24424,
+      "mb": 0.0233
+    },
+    {
+      "name": "mutation_rate",
+      "bytes": 24424,
+      "mb": 0.0233
+    },
+    {
+      "name": "home_court_potency",
+      "bytes": 24424,
+      "mb": 0.0233
+    },
+    {
+      "name": "basalmetabolicrate",
+      "bytes": 24424,
+      "mb": 0.0233
+    },
+    {
+      "name": "offspring_energy_fraction",
+      "bytes": 24424,
+      "mb": 0.0233
+    },
+    {
+      "name": "photosynthetic_ratio",
+      "bytes": 24424,
+      "mb": 0.0233
+    },
+    {
+      "name": "spread_threshold",
+      "bytes": 24424,
+      "mb": 0.0233
+    },
+    {
+      "name": "parasitism_rate",
+      "bytes": 24424,
+      "mb": 0.0233
+    },
+    {
+      "name": "history_population",
+      "bytes": 512,
+      "mb": 0.0005
+    },
+    {
+      "name": "history_total_energy",
+      "bytes": 512,
+      "mb": 0.0005
+    },
+    {
+      "name": "history_trait_corr",
+      "bytes": 512,
+      "mb": 0.0005
+    },
+    {
+      "name": "run_archive_container",
+      "bytes": 88,
+      "mb": 0.0001
+    }
+  ],
+  "top_allocations_tracemalloc": [
+    {
+      "location": "C:\\Users\\ADMIN\\Documents\\mr hacker man\\ecosystem_sim\\grid fungi simulation.py:229",
+      "size_mb": 0.1268,
+      "count": 666
+    },
+    {
+      "location": "C:\\Users\\ADMIN\\Documents\\mr hacker man\\ecosystem_sim\\grid fungi simulation.py:210",
+      "size_mb": 0.0703,
+      "count": 1
+    },
+    {
+      "location": "C:\\Users\\ADMIN\\AppData\\Local\\Python\\pythoncore-3.14-64\\Lib\\site-packages\\numpy\\_core\\_methods.py:115",
+      "size_mb": 0.0676,
+      "count": 13
+    },
+    {
+      "location": "C:\\Users\\ADMIN\\Documents\\mr hacker man\\ecosystem_sim\\grid fungi simulation.py:437",
+      "size_mb": 0.0378,
+      "count": 1650
+    },
+    {
+      "location": "C:\\Users\\ADMIN\\Documents\\mr hacker man\\ecosystem_sim\\grid fungi simulation.py:996",
+      "size_mb": 0.0365,
+      "count": 12
+    },
+    {
+      "location": "C:\\Users\\ADMIN\\Documents\\mr hacker man\\ecosystem_sim\\grid fungi simulation.py:998",
+      "size_mb": 0.0363,
+      "count": 11
+    },
+    {
+      "location": "C:\\Users\\ADMIN\\Documents\\mr hacker man\\ecosystem_sim\\grid fungi simulation.py:997",
+      "size_mb": 0.0243,
+      "count": 10
+    },
+    {
+      "location": "C:\\Users\\ADMIN\\Documents\\mr hacker man\\ecosystem_sim\\grid fungi simulation.py:656",
+      "size_mb": 0.0191,
+      "count": 2
+    },
+    {
+      "location": "C:\\Users\\ADMIN\\Documents\\mr hacker man\\ecosystem_sim\\grid fungi simulation.py:433",
+      "size_mb": 0.0175,
+      "count": 764
+    },
+    {
+      "location": "C:\\Users\\ADMIN\\Documents\\mr hacker man\\ecosystem_sim\\grid fungi simulation.py:424",
+      "size_mb": 0.0153,
+      "count": 669
+    },
+    {
+      "location": "C:\\Users\\ADMIN\\Documents\\mr hacker man\\ecosystem_sim\\grid fungi simulation.py:423",
+      "size_mb": 0.0147,
+      "count": 644
+    },
+    {
+      "location": "C:\\Users\\ADMIN\\Documents\\mr hacker man\\ecosystem_sim\\grid fungi simulation.py:304",
+      "size_mb": 0.0121,
+      "count": 1
+    }
+  ],
+  "notes": [
+    "tick_profile.jsonl contains one row per tick for AI analysis.",
+    "slowest_tick and memory_sinks_ranked point to optimization targets.",
+    "source_file and code snapshot identify exact code under analysis."
+  ]
+}
