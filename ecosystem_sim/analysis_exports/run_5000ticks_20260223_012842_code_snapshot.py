@@ -32,14 +32,6 @@ tile_of = []
 Age = []
 alive_indices = set()
 
-
-MAX_HISTORY = 8000
-CLEANUP_INTERVALS = 2000
-
-max_age = 200000
-run_ticks = 5000  # adjust this to control simulation length before replay
-replay_interval_ms = 50
-
 #the world variables 
 
 Width = 100
@@ -53,24 +45,17 @@ initial_energy = 150
 base_energyconsumption = initial_energy * 0.007
 spread_energy_threshhold = initial_energy * 1.1
 
+MAX_HISTORY = 8000
+CLEANUP_INTERVALS = 2000
+
+max_age = 200000
+run_ticks = 5000  # adjust this to control simulation length before replay
+replay_interval_ms = 50
+
 World = [None] * Width * Width
+Energy_map = [max_sunenergy] * Width * Width
 neighbor_cache = []
 spatial_occupancy = {}
-
-# Energy_map represents LIGHT INTENSITY (not stored energy)
-light_map = [base_tile_energy] * Width * Width  # Start at baseline intensity
-max_tile_light = max_sunenergy  # Maximum light intensity
-
-Nutrient_map = [50.0] * Width * Width
-K_nutrient = 10.0
-nutrient_regen_rate = 0.3
-nutrient_from_death_ratio = 0.08
-
-# For future day/night cycles
-daytime = True
-day_length = 100  # ticks
-night_length = 50  # ticks
-current_day_tick = 0
 
 #organism value modifiers and biases
 solar_efficiency = 2.6
@@ -366,8 +351,8 @@ def apply_environment_preset(name):
 
 
 def reset_energy_map():
-    for i in range(len(light_map)):
-        light_map[i] = max_sunenergy
+    for i in range(len(Energy_map)):
+        Energy_map[i] = max_sunenergy
 
 
 def sample_range(bounds):
@@ -423,7 +408,7 @@ def gen_initial_stats():
     ce_fraction = sample_range(initial_offspring_fraction_range)
     p_ratio = sample_range(initial_photosynthesis_range)
     s_threshold = spread_energy_threshhold * random.uniform(0.9, 1.1)
-    staring_point = random.randint(0,(Width * Width)-1)
+    staring_point = random.randint(0,(Width * Width)-2)
     tile = None
     p_rate = sample_range(initial_parasitism_range)
 
@@ -465,19 +450,8 @@ def birth_organism(energy : float,s_id,invasive_ness: float,m_rate : float,home_
 #set up to fix infinite loop growth 
 free_slot = []
 
-def kill_organism(i,return_energy = True):
-
+def kill_organism(i):
     victim_tile = tile_of[i]
-
-    if return_energy:
-        death_e = Energy[i]
-        Energy_map[victim_tile] += death_e * 0.4  # 40% as light intensity
-        Nutrient_map[victim_tile] += death_e * nutrient_from_death_ratio  # 8% as nutrients
-        # 52% lost to decomposition inefficiency
-
-
-
-    Energy[i] = 0
     Alive[i] = False
     alive_indices.discard(i)
     World[victim_tile] = None
@@ -581,62 +555,24 @@ def handle_overflow(i):
         overflow = Energy[i] - max_e
         Energy[i] = max_e
         
-        # Leak to neighboring tiles as LIGHT INTENSITY
-        # (Organism is glowing/radiating excess energy)
+        # Leak to neighboring tiles
         neighbors = find_neighbour1D(tile_of[i])
         per_neighbor = overflow / len(neighbors)
         for n_tile in neighbors:
             Energy_map[n_tile] += per_neighbor
-
 def calculate_energychange(i):
-    global Energy_map, Nutrient_map, Energy, tick_total_gain, tick_total_bmr, tick_metabolism_count
+    global Energy_map, Energy, tick_total_gain, tick_total_bmr, tick_metabolism_count
 
     tile = tile_of[i]
-    photo = photosynthetic_ratio[i]
-    if photo <= 0.01:
-        Energy[i] -= basalmetabolicrate[i]
+    tile_e = Energy_map[tile]
+    brightness = tile_e/base_tile_energy
+    gain = max_sunenergy * photosynthetic_ratio[i] * brightness
+    if gain > 0:
+        Energy_map[tile] -= gain
+        Energy[i] += gain - basalmetabolicrate[i]
+        tick_total_gain += gain
         tick_total_bmr += basalmetabolicrate[i]
         tick_metabolism_count += 1
-        return
-    
-    brightness = light_map[tile] / base_tile_energy
-    # Maximum energy organism can generate per tick at this brightness
-    # Think: "photons per second * conversion efficiency"
-    max_light_gain = sun_intensity * photo * brightness
-
-    # === NUTRIENT LIMITATION ===
-    nutrients_available = max(0, Nutrient_map[tile])
-    nutrient_saturation = nutrients_available / (nutrients_available + K_nutrient)
-    # Without nutrients, can't convert light to biomass
-    max_nutrient_gain = sun_intensity * photo * brightness * nutrient_saturation
-
-    # === LIEBIG'S LAW ===
-    gain = min(max_light_gain, max_nutrient_gain)
-
-    if gain <= 0:
-        Energy[i] -= basalmetabolicrate[i]
-        tick_total_bmr += basalmetabolicrate[i]
-        tick_metabolism_count += 1
-        return
-    
-    # === DEPLETE LIGHT INTENSITY ===
-    # Organism absorbs/blocks light, reducing intensity for this tile
-    # Think: casting a shadow or absorbing photons
-    light_blocked = gain / (photo * 0.5)  # Inverse of efficiency (50% baseline)
-    light_map[tile] = max(0, light_map[tile] - light_blocked)
-
-    # === DEPLETE NUTRIENTS ===
-    # Physical consumption of nutrients from soil
-    nutrient_consumed = gain * 0.15  # 15% of energy gain requires nutrients
-    Nutrient_map[tile] = max(0, Nutrient_map[tile] - nutrient_consumed)
-
-    # === APPLY GAIN ===
-    Energy[i] += gain - basalmetabolicrate[i]
-    tick_total_gain += gain
-    tick_total_bmr += basalmetabolicrate[i]
-    tick_metabolism_count += 1
-
-
 
 def calculate_parasitism(parasite_idx):
     global tick_parasitism_income
@@ -673,7 +609,6 @@ def calculate_parasitism(parasite_idx):
         # Drain from victim (cannot exceed victim energy)
         energy_drained = (Energy[victim_idx] * net_drain_percent) + net_flat_drain
         energy_drained = min(energy_drained, max(0, Energy[victim_idx]))
-        
         if energy_drained <= 0:
             continue
         Energy[victim_idx] -= energy_drained
@@ -683,26 +618,11 @@ def calculate_parasitism(parasite_idx):
     
     return total_drained
 def update_energy_map():
-    global light_map, Nutrient_map, daytime, current_day_tick
+    global Energy_map
 
-    light_input = sun_intensity # if daytime else 0
-    for i in range(len(light_map)):
-        # === LIGHT INTENSITY REGENERATION ===
-        # Sun constantly inputs light (like sunlight streaming down)
-        light_map[i] += light_input
-        
-        # Dissipate excess (light doesn't accumulate infinitely)
-        if light_map[i] > base_tile_energy:
-            excess = light_map[i] - base_tile_energy
-            light_map[i] -= excess * 0.15  # 15% dissipation
-
-        # Hard cap at maximum intensity
-        light_map[i] = min(Energy_map[i], max_tile_light)
-        
-        # === NUTRIENT REGENERATION ===
-        Nutrient_map[i] = min(Nutrient_map[i] + nutrient_regen_rate, 100.0)
-
-
+    for i in range(len(Energy_map)):
+        restored = Energy_map[i] + sun_intensity
+        Energy_map[i] = restored if restored < base_tile_energy else base_tile_energy
         
 
 # Records for most successful organisms
@@ -857,7 +777,7 @@ def spread_logic():
             winner = max(strength,key=strength.get)
             reward_for_win = 0 
             for loser in organism_indexes:
-                if loser != winner:                    
+                if loser is not winner:                    
                     reward_for_win += calc_winner_e(loser,winner)
             offspring_e_winner = Energy[winner] * offspring_energy_fraction[winner]
             tick_combat_income += reward_for_win
@@ -892,7 +812,7 @@ def spread_logic():
                 tick_combat_income += reward_for_win
                 child_e = reward_for_win + offspring_e
                 
-                kill_organism(defender,return_energy=False)
+                kill_organism(defender)
                 reproduce(winner,child_e,target_tile)
 
         for index_ in organism_indexes:
@@ -1262,10 +1182,10 @@ def build_spatial_layers():
             0.55 * base[2] + 0.45 * lineage_rgb[2],
         )
 
-    for i in range(len(light_map)):
+    for i in range(len(Energy_map)):
         x, y = convert_to2D(i)
         denom = (base_tile_energy * 1.05) if base_tile_energy > 0 else 1.0
-        energy_map_arr[y][x] = light_map[i] / denom
+        energy_map_arr[y][x] = Energy_map[i] / denom
 
     world_array = np.clip(world_array, 0, 1)
     energy_map_arr = np.clip(energy_map_arr, 0, 1)
@@ -1392,7 +1312,7 @@ def estimate_memory_sinks():
         "spread_threshold": spread_threshold,
         "parasitism_rate": parasitism_rate,
         "World": World,
-        "Energy_map": light_map,
+        "Energy_map": Energy_map,
         "history_population": history_population,
         "history_total_energy": history_total_energy,
         "history_trait_corr": history_trait_corr,
