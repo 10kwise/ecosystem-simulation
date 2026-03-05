@@ -1,0 +1,962 @@
+{
+  "run_name": "run_3000ticks_20260223_150148",
+  "created_at": "2026-02-23T15:01:48",
+  "source_file": "c:\\Users\\ADMIN\\Documents\\mr hacker man\\ecosystem_sim\\grid fungi simulation.py",
+  "saved_run_path": "c:\\Users\\ADMIN\\Documents\\mr hacker man\\ecosystem_sim\\saved_runs\\run_3000ticks_20260223_150148.pkl",
+  "tick_profile_path": "c:\\Users\\ADMIN\\Documents\\mr hacker man\\ecosystem_sim\\analysis_exports\\run_3000ticks_20260223_150148_tick_profile.jsonl",
+  "environment_preset": "earth_like",
+  "config": {
+    "Width": 50,
+    "run_ticks_requested": 3000,
+    "run_ticks_executed": 0,
+    "FRAME_CAPTURE_STRIDE": 10,
+    "MAX_REPLAY_FRAMES": 2000,
+    "sun_intensity": 9.2,
+    "solar_efficiency": 2.8,
+    "triat_costmultiplier": 3.0,
+    "invasiveness_bonus_multipliar": 0.002,
+    "parasitism_flat_drain": 0.85,
+    "base_energyconsumption": 1.0,
+    "spread_energy_threshhold": 217.5,
+    "aggresion_reward": 0.06,
+    "defense_cost": 0.01,
+    "tau": 0.54,
+    "alpha": 1.5,
+    "initial_invasiveness_range": [
+      0.12,
+      0.65
+    ],
+    "initial_mutation_rate_range": [
+      0.04,
+      0.18
+    ],
+    "initial_defense_range": [
+      0.16,
+      0.85
+    ],
+    "initial_offspring_fraction_range": [
+      0.08,
+      0.48
+    ],
+    "initial_photosynthesis_range": [
+      0.32,
+      0.88
+    ],
+    "initial_parasitism_range": [
+      0.03,
+      0.38
+    ],
+    "photo_parasite_tradeoff": 0.55,
+    "photo_invasive_tradeoff": 0.3,
+    "defense_invasive_tradeoff": 0.2
+  },
+  "preset_options": {
+    "baseline": {
+      "sun_intensity": 8.2,
+      "solar_efficiency": 2.6,
+      "triat_costmultiplier": 3.0,
+      "invasiveness_bonus_multipliar": 0.0024,
+      "parasitism_flat_drain": 0.8,
+      "tau": 0.55,
+      "alpha": 1.5,
+      "aggresion_reward": 0.06,
+      "defense_cost": 0.009,
+      "K_nutrient": 8.0,
+      "nutrient_regen_rate": 0.34,
+      "nutrient_from_death_ratio": 0.1,
+      "initial_invasiveness_range": [
+        0.12,
+        0.7
+      ],
+      "initial_mutation_rate_range": [
+        0.04,
+        0.18
+      ],
+      "initial_defense_range": [
+        0.15,
+        0.85
+      ],
+      "initial_offspring_fraction_range": [
+        0.1,
+        0.55
+      ],
+      "initial_photosynthesis_range": [
+        0.3,
+        0.9
+      ],
+      "initial_parasitism_range": [
+        0.02,
+        0.45
+      ],
+      "photo_parasite_tradeoff": 0.45,
+      "photo_invasive_tradeoff": 0.25,
+      "defense_invasive_tradeoff": 0.2
+    },
+    "symbiosis_soft_competition": {
+      "sun_intensity": 8.4,
+      "solar_efficiency": 2.7,
+      "triat_costmultiplier": 2.7,
+      "invasiveness_bonus_multipliar": 0.0016,
+      "parasitism_flat_drain": 0.55,
+      "tau": 0.58,
+      "alpha": 1.35,
+      "aggresion_reward": 0.04,
+      "defense_cost": 0.008,
+      "K_nutrient": 7.0,
+      "nutrient_regen_rate": 0.4,
+      "nutrient_from_death_ratio": 0.1,
+      "initial_invasiveness_range": [
+        0.08,
+        0.45
+      ],
+      "initial_mutation_rate_range": [
+        0.04,
+        0.16
+      ],
+      "initial_defense_range": [
+        0.18,
+        0.9
+      ],
+      "initial_offspring_fraction_range": [
+        0.08,
+        0.42
+      ],
+      "initial_photosynthesis_range": [
+        0.35,
+        0.9
+      ],
+      "initial_parasitism_range": [
+        0.02,
+        0.3
+      ],
+      "photo_parasite_tradeoff": 0.55,
+      "photo_invasive_tradeoff": 0.3,
+      "defense_invasive_tradeoff": 0.22
+    },
+    "symbiosis_patchy": {
+      "sun_intensity": 7.8,
+      "solar_efficiency": 2.5,
+      "triat_costmultiplier": 3.0,
+      "invasiveness_bonus_multipliar": 0.0023,
+      "parasitism_flat_drain": 0.9,
+      "tau": 0.55,
+      "alpha": 1.55,
+      "aggresion_reward": 0.06,
+      "defense_cost": 0.009,
+      "K_nutrient": 8.8,
+      "nutrient_regen_rate": 0.32,
+      "nutrient_from_death_ratio": 0.09,
+      "initial_invasiveness_range": [
+        0.1,
+        0.6
+      ],
+      "initial_mutation_rate_range": [
+        0.05,
+        0.2
+      ],
+      "initial_defense_range": [
+        0.1,
+        0.8
+      ],
+      "initial_offspring_fraction_range": [
+        0.08,
+        0.45
+      ],
+      "initial_photosynthesis_range": [
+        0.25,
+        0.82
+      ],
+      "initial_parasitism_range": [
+        0.05,
+        0.42
+      ],
+      "photo_parasite_tradeoff": 0.45,
+      "photo_invasive_tradeoff": 0.22,
+      "defense_invasive_tradeoff": 0.18
+    },
+    "symbiosis_tense": {
+      "sun_intensity": 7.8,
+      "solar_efficiency": 2.6,
+      "triat_costmultiplier": 3.0,
+      "invasiveness_bonus_multipliar": 0.0026,
+      "parasitism_flat_drain": 1.0,
+      "tau": 0.53,
+      "alpha": 1.6,
+      "aggresion_reward": 0.075,
+      "defense_cost": 0.009,
+      "K_nutrient": 8.8,
+      "nutrient_regen_rate": 0.3,
+      "nutrient_from_death_ratio": 0.08,
+      "initial_invasiveness_range": [
+        0.12,
+        0.65
+      ],
+      "initial_mutation_rate_range": [
+        0.05,
+        0.2
+      ],
+      "initial_defense_range": [
+        0.1,
+        0.8
+      ],
+      "initial_offspring_fraction_range": [
+        0.08,
+        0.4
+      ],
+      "initial_photosynthesis_range": [
+        0.2,
+        0.78
+      ],
+      "initial_parasitism_range": [
+        0.07,
+        0.5
+      ],
+      "photo_parasite_tradeoff": 0.35,
+      "photo_invasive_tradeoff": 0.18,
+      "defense_invasive_tradeoff": 0.14
+    },
+    "earth_like": {
+      "sun_intensity": 9.2,
+      "solar_efficiency": 2.8,
+      "triat_costmultiplier": 3.0,
+      "defence_cost_multipliar": 6.2,
+      "invasiveness_cost_multipliar": 2.1,
+      "invasiveness_bonus_multipliar": 0.002,
+      "parasitism_cost_multiplier": 4.2,
+      "parasitism_flat_drain": 0.85,
+      "base_energyconsumption": 1.0,
+      "spread_energy_threshhold": 217.5,
+      "tau": 0.54,
+      "alpha": 1.5,
+      "aggresion_reward": 0.06,
+      "defense_cost": 0.01,
+      "K_nutrient": 7.0,
+      "nutrient_regen_rate": 0.4,
+      "nutrient_from_death_ratio": 0.11,
+      "initial_invasiveness_range": [
+        0.12,
+        0.65
+      ],
+      "initial_mutation_rate_range": [
+        0.04,
+        0.18
+      ],
+      "initial_defense_range": [
+        0.16,
+        0.85
+      ],
+      "initial_offspring_fraction_range": [
+        0.08,
+        0.48
+      ],
+      "initial_photosynthesis_range": [
+        0.32,
+        0.88
+      ],
+      "initial_parasitism_range": [
+        0.03,
+        0.38
+      ],
+      "photo_parasite_tradeoff": 0.55,
+      "photo_invasive_tradeoff": 0.3,
+      "defense_invasive_tradeoff": 0.2
+    },
+    "mars_harsh": {
+      "sun_intensity": 2.5,
+      "solar_efficiency": 1.45,
+      "triat_costmultiplier": 1.5,
+      "defence_cost_multipliar": 3.6,
+      "invasiveness_cost_multipliar": 1.5,
+      "invasiveness_bonus_multipliar": 0.0011,
+      "parasitism_cost_multiplier": 2.3,
+      "parasitism_flat_drain": 1.5,
+      "base_energyconsumption": 0.4,
+      "spread_energy_threshhold": 360.0,
+      "tau": 0.5,
+      "alpha": 1.9,
+      "aggresion_reward": 0.08,
+      "defense_cost": 0.012,
+      "K_nutrient": 10.5,
+      "nutrient_regen_rate": 0.2,
+      "nutrient_from_death_ratio": 0.05,
+      "initial_invasiveness_range": [
+        0.08,
+        0.35
+      ],
+      "initial_mutation_rate_range": [
+        0.03,
+        0.12
+      ],
+      "initial_defense_range": [
+        0.1,
+        0.65
+      ],
+      "initial_offspring_fraction_range": [
+        0.04,
+        0.18
+      ],
+      "initial_photosynthesis_range": [
+        0.18,
+        0.58
+      ],
+      "initial_parasitism_range": [
+        0.02,
+        0.3
+      ],
+      "photo_parasite_tradeoff": 0.35,
+      "photo_invasive_tradeoff": 0.18,
+      "defense_invasive_tradeoff": 0.14
+    },
+    "deep_sea": {
+      "sun_intensity": 1.5,
+      "solar_efficiency": 1.2,
+      "triat_costmultiplier": 1.3,
+      "defence_cost_multipliar": 3.0,
+      "invasiveness_cost_multipliar": 1.0,
+      "invasiveness_bonus_multipliar": 0.0009,
+      "parasitism_cost_multiplier": 1.8,
+      "parasitism_flat_drain": 1.1,
+      "base_energyconsumption": 0.25,
+      "spread_energy_threshhold": 375.0,
+      "tau": 0.6,
+      "alpha": 1.25,
+      "aggresion_reward": 0.035,
+      "defense_cost": 0.006,
+      "K_nutrient": 3.8,
+      "nutrient_regen_rate": 1.05,
+      "nutrient_from_death_ratio": 0.2,
+      "initial_invasiveness_range": [
+        0.01,
+        0.2
+      ],
+      "initial_mutation_rate_range": [
+        0.05,
+        0.2
+      ],
+      "initial_defense_range": [
+        0.08,
+        0.55
+      ],
+      "initial_offspring_fraction_range": [
+        0.02,
+        0.16
+      ],
+      "initial_photosynthesis_range": [
+        0.05,
+        0.35
+      ],
+      "initial_parasitism_range": [
+        0.02,
+        0.4
+      ],
+      "photo_parasite_tradeoff": 0.08,
+      "photo_invasive_tradeoff": 0.08,
+      "defense_invasive_tradeoff": 0.18
+    },
+    "proxima_b": {
+      "sun_intensity": 3.5,
+      "solar_efficiency": 1.7,
+      "triat_costmultiplier": 1.9,
+      "defence_cost_multipliar": 4.2,
+      "invasiveness_cost_multipliar": 1.8,
+      "invasiveness_bonus_multipliar": 0.0021,
+      "parasitism_cost_multiplier": 2.7,
+      "parasitism_flat_drain": 1.0,
+      "base_energyconsumption": 0.5,
+      "spread_energy_threshhold": 300.0,
+      "tau": 0.5,
+      "alpha": 1.85,
+      "aggresion_reward": 0.08,
+      "defense_cost": 0.01,
+      "K_nutrient": 7.0,
+      "nutrient_regen_rate": 0.33,
+      "nutrient_from_death_ratio": 0.1,
+      "initial_invasiveness_range": [
+        0.08,
+        0.55
+      ],
+      "initial_mutation_rate_range": [
+        0.06,
+        0.25
+      ],
+      "initial_defense_range": [
+        0.12,
+        0.75
+      ],
+      "initial_offspring_fraction_range": [
+        0.05,
+        0.28
+      ],
+      "initial_photosynthesis_range": [
+        0.18,
+        0.7
+      ],
+      "initial_parasitism_range": [
+        0.03,
+        0.45
+      ],
+      "photo_parasite_tradeoff": 0.4,
+      "photo_invasive_tradeoff": 0.18,
+      "defense_invasive_tradeoff": 0.16
+    },
+    "custom": {
+      "sun_intensity": 0.35,
+      "solar_efficiency": 0.6,
+      "triat_costmultiplier": 4.0,
+      "defence_cost_multipliar": 6.2,
+      "invasiveness_cost_multipliar": 1.8,
+      "invasiveness_bonus_multipliar": 0.008,
+      "parasitism_cost_multiplier": 2.6,
+      "parasitism_flat_drain": 3.6,
+      "tau": 0.6,
+      "alpha": 1.3,
+      "aggresion_reward": 0.04,
+      "defense_cost": 0.021,
+      "K_nutrient": 9.5,
+      "nutrient_regen_rate": 0.4,
+      "nutrient_from_death_ratio": 0.11,
+      "initial_invasiveness_range": [
+        0.08,
+        0.6
+      ],
+      "initial_mutation_rate_range": [
+        0.04,
+        0.2
+      ],
+      "initial_defense_range": [
+        0.25,
+        0.95
+      ],
+      "initial_offspring_fraction_range": [
+        0.15,
+        0.7
+      ],
+      "initial_photosynthesis_range": [
+        0.0,
+        0.18
+      ],
+      "initial_parasitism_range": [
+        0.2,
+        0.95
+      ],
+      "photo_parasite_tradeoff": 0.2,
+      "photo_invasive_tradeoff": 0.15,
+      "defense_invasive_tradeoff": 0.3
+    }
+  },
+  "preset_options_for_symbiosis": {
+    "baseline": {
+      "sun_intensity": 8.2,
+      "solar_efficiency": 2.6,
+      "triat_costmultiplier": 3.0,
+      "invasiveness_bonus_multipliar": 0.0024,
+      "parasitism_flat_drain": 0.8,
+      "tau": 0.55,
+      "alpha": 1.5,
+      "aggresion_reward": 0.06,
+      "defense_cost": 0.009,
+      "K_nutrient": 8.0,
+      "nutrient_regen_rate": 0.34,
+      "nutrient_from_death_ratio": 0.1,
+      "initial_invasiveness_range": [
+        0.12,
+        0.7
+      ],
+      "initial_mutation_rate_range": [
+        0.04,
+        0.18
+      ],
+      "initial_defense_range": [
+        0.15,
+        0.85
+      ],
+      "initial_offspring_fraction_range": [
+        0.1,
+        0.55
+      ],
+      "initial_photosynthesis_range": [
+        0.3,
+        0.9
+      ],
+      "initial_parasitism_range": [
+        0.02,
+        0.45
+      ],
+      "photo_parasite_tradeoff": 0.45,
+      "photo_invasive_tradeoff": 0.25,
+      "defense_invasive_tradeoff": 0.2
+    },
+    "symbiosis_soft_competition": {
+      "sun_intensity": 8.4,
+      "solar_efficiency": 2.7,
+      "triat_costmultiplier": 2.7,
+      "invasiveness_bonus_multipliar": 0.0016,
+      "parasitism_flat_drain": 0.55,
+      "tau": 0.58,
+      "alpha": 1.35,
+      "aggresion_reward": 0.04,
+      "defense_cost": 0.008,
+      "K_nutrient": 7.0,
+      "nutrient_regen_rate": 0.4,
+      "nutrient_from_death_ratio": 0.1,
+      "initial_invasiveness_range": [
+        0.08,
+        0.45
+      ],
+      "initial_mutation_rate_range": [
+        0.04,
+        0.16
+      ],
+      "initial_defense_range": [
+        0.18,
+        0.9
+      ],
+      "initial_offspring_fraction_range": [
+        0.08,
+        0.42
+      ],
+      "initial_photosynthesis_range": [
+        0.35,
+        0.9
+      ],
+      "initial_parasitism_range": [
+        0.02,
+        0.3
+      ],
+      "photo_parasite_tradeoff": 0.55,
+      "photo_invasive_tradeoff": 0.3,
+      "defense_invasive_tradeoff": 0.22
+    },
+    "symbiosis_patchy": {
+      "sun_intensity": 7.8,
+      "solar_efficiency": 2.5,
+      "triat_costmultiplier": 3.0,
+      "invasiveness_bonus_multipliar": 0.0023,
+      "parasitism_flat_drain": 0.9,
+      "tau": 0.55,
+      "alpha": 1.55,
+      "aggresion_reward": 0.06,
+      "defense_cost": 0.009,
+      "K_nutrient": 8.8,
+      "nutrient_regen_rate": 0.32,
+      "nutrient_from_death_ratio": 0.09,
+      "initial_invasiveness_range": [
+        0.1,
+        0.6
+      ],
+      "initial_mutation_rate_range": [
+        0.05,
+        0.2
+      ],
+      "initial_defense_range": [
+        0.1,
+        0.8
+      ],
+      "initial_offspring_fraction_range": [
+        0.08,
+        0.45
+      ],
+      "initial_photosynthesis_range": [
+        0.25,
+        0.82
+      ],
+      "initial_parasitism_range": [
+        0.05,
+        0.42
+      ],
+      "photo_parasite_tradeoff": 0.45,
+      "photo_invasive_tradeoff": 0.22,
+      "defense_invasive_tradeoff": 0.18
+    },
+    "symbiosis_tense": {
+      "sun_intensity": 7.8,
+      "solar_efficiency": 2.6,
+      "triat_costmultiplier": 3.0,
+      "invasiveness_bonus_multipliar": 0.0026,
+      "parasitism_flat_drain": 1.0,
+      "tau": 0.53,
+      "alpha": 1.6,
+      "aggresion_reward": 0.075,
+      "defense_cost": 0.009,
+      "K_nutrient": 8.8,
+      "nutrient_regen_rate": 0.3,
+      "nutrient_from_death_ratio": 0.08,
+      "initial_invasiveness_range": [
+        0.12,
+        0.65
+      ],
+      "initial_mutation_rate_range": [
+        0.05,
+        0.2
+      ],
+      "initial_defense_range": [
+        0.1,
+        0.8
+      ],
+      "initial_offspring_fraction_range": [
+        0.08,
+        0.4
+      ],
+      "initial_photosynthesis_range": [
+        0.2,
+        0.78
+      ],
+      "initial_parasitism_range": [
+        0.07,
+        0.5
+      ],
+      "photo_parasite_tradeoff": 0.35,
+      "photo_invasive_tradeoff": 0.18,
+      "defense_invasive_tradeoff": 0.14
+    },
+    "earth_like": {
+      "sun_intensity": 9.2,
+      "solar_efficiency": 2.8,
+      "triat_costmultiplier": 3.0,
+      "defence_cost_multipliar": 6.2,
+      "invasiveness_cost_multipliar": 2.1,
+      "invasiveness_bonus_multipliar": 0.002,
+      "parasitism_cost_multiplier": 4.2,
+      "parasitism_flat_drain": 0.85,
+      "base_energyconsumption": 1.0,
+      "spread_energy_threshhold": 217.5,
+      "tau": 0.54,
+      "alpha": 1.5,
+      "aggresion_reward": 0.06,
+      "defense_cost": 0.01,
+      "K_nutrient": 7.0,
+      "nutrient_regen_rate": 0.4,
+      "nutrient_from_death_ratio": 0.11,
+      "initial_invasiveness_range": [
+        0.12,
+        0.65
+      ],
+      "initial_mutation_rate_range": [
+        0.04,
+        0.18
+      ],
+      "initial_defense_range": [
+        0.16,
+        0.85
+      ],
+      "initial_offspring_fraction_range": [
+        0.08,
+        0.48
+      ],
+      "initial_photosynthesis_range": [
+        0.32,
+        0.88
+      ],
+      "initial_parasitism_range": [
+        0.03,
+        0.38
+      ],
+      "photo_parasite_tradeoff": 0.55,
+      "photo_invasive_tradeoff": 0.3,
+      "defense_invasive_tradeoff": 0.2
+    },
+    "mars_harsh": {
+      "sun_intensity": 2.5,
+      "solar_efficiency": 1.45,
+      "triat_costmultiplier": 1.5,
+      "defence_cost_multipliar": 3.6,
+      "invasiveness_cost_multipliar": 1.5,
+      "invasiveness_bonus_multipliar": 0.0011,
+      "parasitism_cost_multiplier": 2.3,
+      "parasitism_flat_drain": 1.5,
+      "base_energyconsumption": 0.4,
+      "spread_energy_threshhold": 360.0,
+      "tau": 0.5,
+      "alpha": 1.9,
+      "aggresion_reward": 0.08,
+      "defense_cost": 0.012,
+      "K_nutrient": 10.5,
+      "nutrient_regen_rate": 0.2,
+      "nutrient_from_death_ratio": 0.05,
+      "initial_invasiveness_range": [
+        0.08,
+        0.35
+      ],
+      "initial_mutation_rate_range": [
+        0.03,
+        0.12
+      ],
+      "initial_defense_range": [
+        0.1,
+        0.65
+      ],
+      "initial_offspring_fraction_range": [
+        0.04,
+        0.18
+      ],
+      "initial_photosynthesis_range": [
+        0.18,
+        0.58
+      ],
+      "initial_parasitism_range": [
+        0.02,
+        0.3
+      ],
+      "photo_parasite_tradeoff": 0.35,
+      "photo_invasive_tradeoff": 0.18,
+      "defense_invasive_tradeoff": 0.14
+    },
+    "deep_sea": {
+      "sun_intensity": 1.5,
+      "solar_efficiency": 1.2,
+      "triat_costmultiplier": 1.3,
+      "defence_cost_multipliar": 3.0,
+      "invasiveness_cost_multipliar": 1.0,
+      "invasiveness_bonus_multipliar": 0.0009,
+      "parasitism_cost_multiplier": 1.8,
+      "parasitism_flat_drain": 1.1,
+      "base_energyconsumption": 0.25,
+      "spread_energy_threshhold": 375.0,
+      "tau": 0.6,
+      "alpha": 1.25,
+      "aggresion_reward": 0.035,
+      "defense_cost": 0.006,
+      "K_nutrient": 3.8,
+      "nutrient_regen_rate": 1.05,
+      "nutrient_from_death_ratio": 0.2,
+      "initial_invasiveness_range": [
+        0.01,
+        0.2
+      ],
+      "initial_mutation_rate_range": [
+        0.05,
+        0.2
+      ],
+      "initial_defense_range": [
+        0.08,
+        0.55
+      ],
+      "initial_offspring_fraction_range": [
+        0.02,
+        0.16
+      ],
+      "initial_photosynthesis_range": [
+        0.05,
+        0.35
+      ],
+      "initial_parasitism_range": [
+        0.02,
+        0.4
+      ],
+      "photo_parasite_tradeoff": 0.08,
+      "photo_invasive_tradeoff": 0.08,
+      "defense_invasive_tradeoff": 0.18
+    },
+    "proxima_b": {
+      "sun_intensity": 3.5,
+      "solar_efficiency": 1.7,
+      "triat_costmultiplier": 1.9,
+      "defence_cost_multipliar": 4.2,
+      "invasiveness_cost_multipliar": 1.8,
+      "invasiveness_bonus_multipliar": 0.0021,
+      "parasitism_cost_multiplier": 2.7,
+      "parasitism_flat_drain": 1.0,
+      "base_energyconsumption": 0.5,
+      "spread_energy_threshhold": 300.0,
+      "tau": 0.5,
+      "alpha": 1.85,
+      "aggresion_reward": 0.08,
+      "defense_cost": 0.01,
+      "K_nutrient": 7.0,
+      "nutrient_regen_rate": 0.33,
+      "nutrient_from_death_ratio": 0.1,
+      "initial_invasiveness_range": [
+        0.08,
+        0.55
+      ],
+      "initial_mutation_rate_range": [
+        0.06,
+        0.25
+      ],
+      "initial_defense_range": [
+        0.12,
+        0.75
+      ],
+      "initial_offspring_fraction_range": [
+        0.05,
+        0.28
+      ],
+      "initial_photosynthesis_range": [
+        0.18,
+        0.7
+      ],
+      "initial_parasitism_range": [
+        0.03,
+        0.45
+      ],
+      "photo_parasite_tradeoff": 0.4,
+      "photo_invasive_tradeoff": 0.18,
+      "defense_invasive_tradeoff": 0.16
+    },
+    "custom": {
+      "sun_intensity": 0.35,
+      "solar_efficiency": 0.6,
+      "triat_costmultiplier": 4.0,
+      "defence_cost_multipliar": 6.2,
+      "invasiveness_cost_multipliar": 1.8,
+      "invasiveness_bonus_multipliar": 0.008,
+      "parasitism_cost_multiplier": 2.6,
+      "parasitism_flat_drain": 3.6,
+      "tau": 0.6,
+      "alpha": 1.3,
+      "aggresion_reward": 0.04,
+      "defense_cost": 0.021,
+      "K_nutrient": 9.5,
+      "nutrient_regen_rate": 0.4,
+      "nutrient_from_death_ratio": 0.11,
+      "initial_invasiveness_range": [
+        0.08,
+        0.6
+      ],
+      "initial_mutation_rate_range": [
+        0.04,
+        0.2
+      ],
+      "initial_defense_range": [
+        0.25,
+        0.95
+      ],
+      "initial_offspring_fraction_range": [
+        0.15,
+        0.7
+      ],
+      "initial_photosynthesis_range": [
+        0.0,
+        0.18
+      ],
+      "initial_parasitism_range": [
+        0.2,
+        0.95
+      ],
+      "photo_parasite_tradeoff": 0.2,
+      "photo_invasive_tradeoff": 0.15,
+      "defense_invasive_tradeoff": 0.3
+    }
+  },
+  "interesting_ticks": {},
+  "timing_hotspots_ms": {},
+  "expensive_spots_ranked": [],
+  "memory_sinks_ranked": [
+    {
+      "name": "current_run_frames_arrays",
+      "bytes": 7500000,
+      "mb": 7.1526
+    },
+    {
+      "name": "history_population",
+      "bytes": 50040,
+      "mb": 0.0477
+    },
+    {
+      "name": "history_total_energy",
+      "bytes": 50040,
+      "mb": 0.0477
+    },
+    {
+      "name": "history_trait_corr",
+      "bytes": 50040,
+      "mb": 0.0477
+    },
+    {
+      "name": "World",
+      "bytes": 40056,
+      "mb": 0.0382
+    },
+    {
+      "name": "Energy_map",
+      "bytes": 40056,
+      "mb": 0.0382
+    },
+    {
+      "name": "species_color_dict",
+      "bytes": 36952,
+      "mb": 0.0352
+    },
+    {
+      "name": "parent_registry_dict",
+      "bytes": 36952,
+      "mb": 0.0352
+    },
+    {
+      "name": "Alive",
+      "bytes": 21288,
+      "mb": 0.0203
+    },
+    {
+      "name": "Energy",
+      "bytes": 21288,
+      "mb": 0.0203
+    },
+    {
+      "name": "tile_of",
+      "bytes": 21288,
+      "mb": 0.0203
+    },
+    {
+      "name": "Age",
+      "bytes": 21288,
+      "mb": 0.0203
+    },
+    {
+      "name": "species_id",
+      "bytes": 21288,
+      "mb": 0.0203
+    },
+    {
+      "name": "invasiveness",
+      "bytes": 21288,
+      "mb": 0.0203
+    },
+    {
+      "name": "mutation_rate",
+      "bytes": 21288,
+      "mb": 0.0203
+    },
+    {
+      "name": "home_court_potency",
+      "bytes": 21288,
+      "mb": 0.0203
+    },
+    {
+      "name": "basalmetabolicrate",
+      "bytes": 21288,
+      "mb": 0.0203
+    },
+    {
+      "name": "offspring_energy_fraction",
+      "bytes": 21288,
+      "mb": 0.0203
+    },
+    {
+      "name": "photosynthetic_ratio",
+      "bytes": 21288,
+      "mb": 0.0203
+    },
+    {
+      "name": "spread_threshold",
+      "bytes": 21288,
+      "mb": 0.0203
+    },
+    {
+      "name": "parasitism_rate",
+      "bytes": 21288,
+      "mb": 0.0203
+    },
+    {
+      "name": "run_archive_container",
+      "bytes": 88,
+      "mb": 0.0001
+    }
+  ],
+  "top_allocations_tracemalloc": [],
+  "notes": [
+    "tick_profile.jsonl contains one row per tick for AI analysis.",
+    "slowest_tick and memory_sinks_ranked point to optimization targets.",
+    "source_file and code snapshot identify exact code under analysis."
+  ]
+}

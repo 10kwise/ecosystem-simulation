@@ -37,7 +37,7 @@ MAX_HISTORY = 8000
 CLEANUP_INTERVALS = 2000
 
 max_age = 200000
-run_ticks = 5000  # adjust this to control simulation length before replay
+run_ticks = 8000  # adjust this to control simulation length before replay
 replay_interval_ms = 50
 
 #the world variables 
@@ -120,6 +120,7 @@ history_trait_investment = []
 history_trait_corr = []
 history_attacker_win_rate = []
 history_para_photo_ratio = []
+history_unreachable_spread_ratio = []
 
 # in-memory run archive + replay
 run_archive = []
@@ -165,6 +166,9 @@ BASE_ENVIRONMENT = {
     "defense_cost": defense_cost,
     "base_energyconsumption": base_energyconsumption,
     "spread_energy_threshhold": spread_energy_threshhold,
+    "K_nutrient": K_nutrient,
+    "nutrient_regen_rate": nutrient_regen_rate,
+    "nutrient_from_death_ratio": nutrient_from_death_ratio,
     "initial_invasiveness_range": initial_invasiveness_range,
     "initial_mutation_rate_range": initial_mutation_rate_range,
     "initial_defense_range": initial_defense_range,
@@ -177,164 +181,278 @@ BASE_ENVIRONMENT = {
 }
 
 ENVIRONMENT_PRESETS = {
-    "baseline": {},
-    # Lower combat snowball + moderate parasite drain supports longer co-existence.
-    "symbiosis_soft_competition": {
-        "sun_intensity": 9.0,
-        "solar_efficiency": 2.9,
-        "triat_costmultiplier": 2.8,
-        "invasiveness_bonus_multipliar": 0.0025,
-        "parasitism_flat_drain": 0.8,
-        "tau": 0.58,
-        "alpha": 1.4,
-        "aggresion_reward": 0.05,
-        "defense_cost": 0.010,
-    },
-    # Patchy coexistence: some conflict, but less wipeout pressure.
-    "symbiosis_patchy": {
-        "sun_intensity": 8.0,
-        "solar_efficiency": 2.8,
+    "baseline": {
+        "sun_intensity": 8.2,
+        "solar_efficiency": 2.6,
         "triat_costmultiplier": 3.0,
-        "invasiveness_bonus_multipliar": 0.0030,
-        "parasitism_flat_drain": 1.1,
+        "invasiveness_bonus_multipliar": 0.0024,
+        "parasitism_flat_drain": 0.8,
         "tau": 0.55,
-        "alpha": 1.6,
-        "aggresion_reward": 0.07,
-        "defense_cost": 0.008,
-    },
-    # Tense but stable: parasites remain meaningful without immediate collapse.
-    "symbiosis_tense": {
-        "sun_intensity": 8.5,
-        "solar_efficiency": 2.7,
-        "triat_costmultiplier": 3.1,
-        "invasiveness_bonus_multipliar": 0.0035,
-        "parasitism_flat_drain": 1.4,
-        "tau": 0.53,
-        "alpha": 1.7,
-        "aggresion_reward": 0.08,
-        "defense_cost": 0.007,
-    },
-    # Stylized Earth-like biosphere: high primary production + mixed strategies.
-    "earth_like": {
-        "sun_intensity": 10.0,
-        "solar_efficiency": 3.1,
-        "triat_costmultiplier": 2.9,
-        "invasiveness_bonus_multipliar": 0.0028,
-        "parasitism_flat_drain": 0.7,
-        "tau": 0.56,
-        "alpha": 1.45,
-        "aggresion_reward": 0.05,
+        "alpha": 1.5,
+        "aggresion_reward": 0.06,
         "defense_cost": 0.009,
-        "initial_invasiveness_range": (0.15, 0.75),
-        "initial_mutation_rate_range": (0.03, 0.16),
+        "K_nutrient": 8.0,
+        "nutrient_regen_rate": 0.34,
+        "nutrient_from_death_ratio": 0.10,
+        "initial_invasiveness_range": (0.12, 0.70),
+        "initial_mutation_rate_range": (0.04, 0.18),
         "initial_defense_range": (0.15, 0.85),
-        "initial_offspring_fraction_range": (0.2, 0.75),
-        "initial_photosynthesis_range": (0.45, 1.0),
-        "initial_parasitism_range": (0.0, 0.35),
-        "photo_parasite_tradeoff": 0.65,
-        "photo_invasive_tradeoff": 0.35,
-        "defense_invasive_tradeoff": 0.25,
-    },
-    # Stylized Mars-like harsh world: low productivity, conflict-heavy survival.
-    "mars_harsh": {
-        "sun_intensity": 1.8,
-        "solar_efficiency": 1.1,
-        "triat_costmultiplier": 3.8,
-        "defence_cost_multipliar": 6.8,
-        "invasiveness_cost_multipliar": 2.6,
-        "invasiveness_bonus_multipliar": 0.0022,
-        "parasitism_cost_multiplier": 4.8,
-        "parasitism_flat_drain": 1.8,
-        "tau": 0.50,
-        "alpha": 1.9,
-        "aggresion_reward": 0.10,
-        "defense_cost": 0.010,
-        "initial_invasiveness_range": (0.35, 1.0),
-        "initial_mutation_rate_range": (0.02, 0.12),
-        "initial_defense_range": (0.35, 1.0),
-        "initial_offspring_fraction_range": (0.12, 0.55),
-        "initial_photosynthesis_range": (0.02, 0.35),
-        "initial_parasitism_range": (0.15, 0.85),
+        "initial_offspring_fraction_range": (0.10, 0.55),
+        "initial_photosynthesis_range": (0.30, 0.90),
+        "initial_parasitism_range": (0.02, 0.45),
         "photo_parasite_tradeoff": 0.45,
-        "photo_invasive_tradeoff": 0.20,
-        "defense_invasive_tradeoff": 0.10,
-    },
-    # Stylized deep-sea analog: low light, high scavenging/parasitism pressure.
-    "deep_sea": {
-        "sun_intensity": 0.35,
-        "solar_efficiency": 0.35,
-        "triat_costmultiplier": 2.2,
-        "defence_cost_multipliar": 5.2,
-        "invasiveness_cost_multipliar": 1.4,
-        "invasiveness_bonus_multipliar": 0.0015,
-        "parasitism_cost_multiplier": 2.8,
-        "parasitism_flat_drain": 1.0,
-        "base_energyconsumption": 0.45,
-        "spread_energy_threshhold": initial_energy * 0.75,
-        "tau": 0.60,
-        "alpha": 1.3,
-        "aggresion_reward": 0.04,
-        "defense_cost": 0.010,
-        "initial_invasiveness_range": (0.02, 0.30),
-        "initial_mutation_rate_range": (0.05, 0.24),
-        "initial_defense_range": (0.0, 0.45),
-        "initial_offspring_fraction_range": (0.08, 0.45),
-        "initial_photosynthesis_range": (0.0, 0.18),
-        "initial_parasitism_range": (0.03, 0.45),
-        "photo_parasite_tradeoff": 0.12,
-        "photo_invasive_tradeoff": 0.08,
-        "defense_invasive_tradeoff": 0.18,
-    },
-    # Stylized Proxima b analog: variable light + opportunistic mixed ecologies.
-    "proxima_b": {
-        "sun_intensity": 5.2,
-        "solar_efficiency": 1.9,
-        "triat_costmultiplier": 3.4,
-        "defence_cost_multipliar": 6.1,
-        "invasiveness_cost_multipliar": 2.2,
-        "invasiveness_bonus_multipliar": 0.0027,
-        "parasitism_cost_multiplier": 4.2,
-        "parasitism_flat_drain": 1.2,
-        "tau": 0.52,
-        "alpha": 1.8,
-        "aggresion_reward": 0.07,
-        "defense_cost": 0.009,
-        "initial_invasiveness_range": (0.20, 0.85),
-        "initial_mutation_rate_range": (0.03, 0.18),
-        "initial_defense_range": (0.20, 0.95),
-        "initial_offspring_fraction_range": (0.15, 0.75),
-        "initial_photosynthesis_range": (0.10, 0.75),
-        "initial_parasitism_range": (0.05, 0.65),
-        "photo_parasite_tradeoff": 0.55,
         "photo_invasive_tradeoff": 0.25,
         "defense_invasive_tradeoff": 0.20,
     },
-    "custom": {
-        "sun_intensity": 0.35,
-        "solar_efficiency": 0.6,
-        "triat_costmultiplier": 4.0,
-        "defence_cost_multipliar": 6.2,
-        "invasiveness_cost_multipliar": 1.8,
-        "invasiveness_bonus_multipliar": 0.0080,
-        "parasitism_cost_multiplier": 2.6,
-        "parasitism_flat_drain": 3.6,
-        "tau": 0.60,
-        "alpha": 1.3,
+    # Lower combat snowball + moderate parasite drain supports longer co-existence.
+    "symbiosis_soft_competition": {
+        "sun_intensity": 8.4,
+        "solar_efficiency": 2.7,
+        "triat_costmultiplier": 2.7,
+        "invasiveness_bonus_multipliar": 0.0016,
+        "parasitism_flat_drain": 0.55,
+        "tau": 0.58,
+        "alpha": 1.35,
         "aggresion_reward": 0.04,
-        "defense_cost": 0.021,
-        "initial_invasiveness_range": (0.08, 0.60),
+        "defense_cost": 0.008,
+        "K_nutrient": 7.0,
+        "nutrient_regen_rate": 0.40,
+        "nutrient_from_death_ratio": 0.10,
+        "initial_invasiveness_range": (0.08, 0.45),
+        "initial_mutation_rate_range": (0.04, 0.16),
+        "initial_defense_range": (0.18, 0.90),
+        "initial_offspring_fraction_range": (0.08, 0.42),
+        "initial_photosynthesis_range": (0.35, 0.90),
+        "initial_parasitism_range": (0.02, 0.30),
+        "photo_parasite_tradeoff": 0.55,
+        "photo_invasive_tradeoff": 0.30,
+        "defense_invasive_tradeoff": 0.22,
+    },
+    # Patchy coexistence: some conflict, but less wipeout pressure.
+    "symbiosis_patchy": {
+        "sun_intensity": 7.8,
+        "solar_efficiency": 2.5,
+        "triat_costmultiplier": 3.0,
+        "invasiveness_bonus_multipliar": 0.0023,
+        "parasitism_flat_drain": 0.9,
+        "tau": 0.55,
+        "alpha": 1.55,
+        "aggresion_reward": 0.06,
+        "defense_cost": 0.009,
+        "K_nutrient": 8.8,
+        "nutrient_regen_rate": 0.32,
+        "nutrient_from_death_ratio": 0.09,
+        "initial_invasiveness_range": (0.10, 0.60),
+        "initial_mutation_rate_range": (0.05, 0.20),
+        "initial_defense_range": (0.10, 0.80),
+        "initial_offspring_fraction_range": (0.08, 0.45),
+        "initial_photosynthesis_range": (0.25, 0.82),
+        "initial_parasitism_range": (0.05, 0.42),
+        "photo_parasite_tradeoff": 0.45,
+        "photo_invasive_tradeoff": 0.22,
+        "defense_invasive_tradeoff": 0.18,
+    },
+    # Tense but stable: parasites remain meaningful without immediate collapse.
+    "symbiosis_tense": {
+        "sun_intensity": 7.8,
+        "solar_efficiency": 2.6,
+        "triat_costmultiplier": 3.0,
+        "invasiveness_bonus_multipliar": 0.0026,
+        "parasitism_flat_drain": 1.0,
+        "tau": 0.53,
+        "alpha": 1.6,
+        "aggresion_reward": 0.075,
+        "defense_cost": 0.009,
+        "K_nutrient": 8.8,
+        "nutrient_regen_rate": 0.30,
+        "nutrient_from_death_ratio": 0.08,
+        "initial_invasiveness_range": (0.12, 0.65),
+        "initial_mutation_rate_range": (0.05, 0.20),
+        "initial_defense_range": (0.10, 0.80),
+        "initial_offspring_fraction_range": (0.08, 0.40),
+        "initial_photosynthesis_range": (0.20, 0.78),
+        "initial_parasitism_range": (0.07, 0.50),
+        "photo_parasite_tradeoff": 0.35,
+        "photo_invasive_tradeoff": 0.18,
+        "defense_invasive_tradeoff": 0.14,
+    },
+    # Stylized Earth-like biosphere: high productivity with competitive checks.
+    "earth_like": {
+        "sun_intensity": 9.2,
+        "solar_efficiency": 2.8,
+        "triat_costmultiplier": 3.0,
+        "defence_cost_multipliar": 6.2,
+        "invasiveness_cost_multipliar": 2.1,
+        "invasiveness_bonus_multipliar": 0.0020,
+        "parasitism_cost_multiplier": 4.2,
+        "parasitism_flat_drain": 0.85,
+        "base_energyconsumption": 1.0,
+        "spread_energy_threshhold": initial_energy * 1.45,
+        "tau": 0.54,
+        "alpha": 1.50,
+        "aggresion_reward": 0.06,
+        "defense_cost": 0.010,
+        "K_nutrient": 7.0,
+        "nutrient_regen_rate": 0.70,
+        "nutrient_from_death_ratio": 0.11,
+        "initial_invasiveness_range": (0.12, 0.65),
+        "initial_mutation_rate_range": (0.04, 0.18),
+        "initial_defense_range": (0.16, 0.85),
+        "initial_offspring_fraction_range": (0.08, 0.48),
+        "initial_photosynthesis_range": (0.32, 0.88),
+        "initial_parasitism_range": (0.03, 0.38),
+        "photo_parasite_tradeoff": 0.55,
+        "photo_invasive_tradeoff": 0.30,
+        "defense_invasive_tradeoff": 0.20,
+    },
+    # Stylized Mars-like harsh world: low primary productivity, sparse survivors.
+    "mars_harsh": {
+        "sun_intensity": 2.5,
+        "solar_efficiency": 1.45,
+        "triat_costmultiplier": 1.5,
+        "defence_cost_multipliar": 3.6,
+        "invasiveness_cost_multipliar": 1.5,
+        "invasiveness_bonus_multipliar": 0.0011,
+        "parasitism_cost_multiplier": 2.3,
+        "parasitism_flat_drain": 1.5,
+        "base_energyconsumption": 0.40,
+        "spread_energy_threshhold": initial_energy * 2.4,
+        "tau": 0.50,
+        "alpha": 1.9,
+        "aggresion_reward": 0.08,
+        "defense_cost": 0.012,
+        "K_nutrient": 10.5,
+        "nutrient_regen_rate": 0.20,
+        "nutrient_from_death_ratio": 0.05,
+        "initial_invasiveness_range": (0.08, 0.35),
+        "initial_mutation_rate_range": (0.03, 0.12),
+        "initial_defense_range": (0.10, 0.65),
+        "initial_offspring_fraction_range": (0.04, 0.18),
+        "initial_photosynthesis_range": (0.18, 0.58),
+        "initial_parasitism_range": (0.02, 0.30),
+        "photo_parasite_tradeoff": 0.35,
+        "photo_invasive_tradeoff": 0.18,
+        "defense_invasive_tradeoff": 0.14,
+    },
+    # Stylized deep-sea analog: very low light, nutrient recycling dominates.
+    "deep_sea": {
+        "sun_intensity": 1.5,
+        "solar_efficiency": 1.2,
+        "triat_costmultiplier": 1.3,
+        "defence_cost_multipliar": 3.0,
+        "invasiveness_cost_multipliar": 1.0,
+        "invasiveness_bonus_multipliar": 0.0009,
+        "parasitism_cost_multiplier": 1.8,
+        "parasitism_flat_drain": 1.1,
+        "base_energyconsumption": 0.25,
+        "spread_energy_threshhold": initial_energy * 2.5,
+        "tau": 0.60,
+        "alpha": 1.25,
+        "aggresion_reward": 0.035,
+        "defense_cost": 0.006,
+        "K_nutrient": 3.8,
+        "nutrient_regen_rate": 1.05,
+        "nutrient_from_death_ratio": 0.20,
+        "initial_invasiveness_range": (0.01, 0.20),
+        "initial_mutation_rate_range": (0.05, 0.20),
+        "initial_defense_range": (0.08, 0.55),
+        "initial_offspring_fraction_range": (0.02, 0.16),
+        "initial_photosynthesis_range": (0.05, 0.35),
+        "initial_parasitism_range": (0.02, 0.40),
+        "photo_parasite_tradeoff": 0.08,
+        "photo_invasive_tradeoff": 0.08,
+        "defense_invasive_tradeoff": 0.18,
+    },
+    # Stylized Proxima b analog: flare-pressure + unstable resource availability.
+    "proxima_b": {
+        "sun_intensity": 3.5,
+        "solar_efficiency": 1.7,
+        "triat_costmultiplier": 1.9,
+        "defence_cost_multipliar": 4.2,
+        "invasiveness_cost_multipliar": 1.8,
+        "invasiveness_bonus_multipliar": 0.0021,
+        "parasitism_cost_multiplier": 2.7,
+        "parasitism_flat_drain": 1.0,
+        "base_energyconsumption": 0.50,
+        "spread_energy_threshhold": initial_energy * 2.0,
+        "tau": 0.50,
+        "alpha": 1.85,
+        "aggresion_reward": 0.08,
+        "defense_cost": 0.010,
+        "K_nutrient": 7.0,
+        "nutrient_regen_rate": 0.33,
+        "nutrient_from_death_ratio": 0.10,
+        "initial_invasiveness_range": (0.08, 0.55),
+        "initial_mutation_rate_range": (0.06, 0.25),
+        "initial_defense_range": (0.12, 0.75),
+        "initial_offspring_fraction_range": (0.05, 0.28),
+        "initial_photosynthesis_range": (0.18, 0.70),
+        "initial_parasitism_range": (0.03, 0.45),
+        "photo_parasite_tradeoff": 0.40,
+        "photo_invasive_tradeoff": 0.18,
+        "defense_invasive_tradeoff": 0.16,
+    },
+    # Earth-like productivity with higher payoff for mixed strategies.
+    "earth_2": {
+        "sun_intensity": 8.8,
+        "solar_efficiency": 2.55,
+        "triat_costmultiplier": 2.35,
+        "defence_cost_multipliar": 4.8,
+        "invasiveness_cost_multipliar": 1.35,
+        "invasiveness_bonus_multipliar": 0.0042,
+        "parasitism_cost_multiplier": 2.5,
+        "parasitism_flat_drain": 1.35,
+        "base_energyconsumption": 0.85,
+        "spread_energy_threshhold": initial_energy * 1.50,
+        "tau": 0.56,
+        "alpha": 1.62,
+        "aggresion_reward": 0.09,
+        "defense_cost": 0.013,
+        "K_nutrient": 7.5,
+        "nutrient_regen_rate": 0.78,
+        "nutrient_from_death_ratio": 0.13,
+        "initial_invasiveness_range": (0.12, 0.75),
         "initial_mutation_rate_range": (0.04, 0.20),
-        "initial_defense_range": (0.25, 0.95),
-        "initial_offspring_fraction_range": (0.15, 0.70),
-        "initial_photosynthesis_range": (0.0, 0.18),
-        "initial_parasitism_range": (0.20, 0.95),
-        "photo_parasite_tradeoff": 0.20,
+        "initial_defense_range": (0.12, 0.88),
+        "initial_offspring_fraction_range": (0.08, 0.50),
+        "initial_photosynthesis_range": (0.24, 0.82),
+        "initial_parasitism_range": (0.05, 0.55),
+        "photo_parasite_tradeoff": 0.30,
         "photo_invasive_tradeoff": 0.15,
-        "defense_invasive_tradeoff": 0.30,
+        "defense_invasive_tradeoff": 0.10,
+    },
+    # Backward-compatible alias for old preset name.
+    "custom": {
+        "sun_intensity": 8.8,
+        "solar_efficiency": 2.55,
+        "triat_costmultiplier": 2.35,
+        "defence_cost_multipliar": 3.8,
+        "invasiveness_cost_multipliar": 1.35,
+        "invasiveness_bonus_multipliar": 0.0042,
+        "parasitism_cost_multiplier": 1.5,
+        "parasitism_flat_drain": 2.35,
+        "base_energyconsumption": 0.55,
+        "spread_energy_threshhold": initial_energy * 1.30,
+        "tau": 0.56,
+        "alpha": 1.62,
+        "aggresion_reward": 0.09,
+        "defense_cost": 0.013,
+        "K_nutrient": 7.5,
+        "nutrient_regen_rate": 0.78,
+        "nutrient_from_death_ratio": 0.13,
+        "initial_invasiveness_range": (0.12, 0.75),
+        "initial_mutation_rate_range": (0.04, 0.20),
+        "initial_defense_range": (0.12, 0.88),
+        "initial_offspring_fraction_range": (0.08, 0.50),
+        "initial_photosynthesis_range": (0.24, 0.82),
+        "initial_parasitism_range": (0.05, 0.55),
+        "photo_parasite_tradeoff": 0.30,
+        "photo_invasive_tradeoff": 0.15,
+        "defense_invasive_tradeoff": 0.10,
     },
 }
 
-ENVIRONMENT_PRESET = "earth_like"
+ENVIRONMENT_PRESET = "custom"
 
 
 next_speciesID = 0
@@ -354,6 +472,7 @@ def apply_environment_preset(name):
     global invasiveness_cost_multipliar, invasiveness_bonus_multipliar
     global parasitism_cost_multiplier, parasitism_flat_drain, tau, alpha
     global aggresion_reward, defense_cost, base_energyconsumption, spread_energy_threshhold
+    global K_nutrient, nutrient_regen_rate, nutrient_from_death_ratio
 
     if name not in ENVIRONMENT_PRESETS:
         raise ValueError(f"Unknown environment preset: {name}")
@@ -375,6 +494,108 @@ def sample_range(bounds):
     if lo > hi:
         lo, hi = hi, lo
     return random.uniform(lo, hi)
+
+
+def reset_simulation_state(clear_run_data=False):
+    global species_id, invasiveness, mutation_rate, home_court_potency
+    global basalmetabolicrate, offspring_energy_fraction, photosynthetic_ratio
+    global spread_threshold, parasitism_rate, species_color
+    global Alive, Energy, tile_of, Age, alive_indices
+    global World, spatial_occupancy, light_map, Nutrient_map
+    global history_population, history_total_energy, history_avg_photosynthesis
+    global history_avg_defense, history_avg_age, history_avg_invasiveness, history_avg_parasitism
+    global history_avg_gain, history_avg_bmr, history_combat_income
+    global history_species_richness, history_shannon_diversity, history_evenness
+    global history_age_structure, history_energy_gini, history_territory_stability
+    global history_trait_investment, history_trait_corr, history_attacker_win_rate, history_para_photo_ratio
+    global history_unreachable_spread_ratio
+    global current_run_frames, current_capture_step, run_archive
+    global replay_mode, replay_run_index, replay_frame_index, replay_playing
+    global next_speciesID, parent_registry, previous_tile_species
+    global free_slot, pending_births, best_organism_ever, current_best
+    global tick_total_gain, tick_total_bmr, tick_metabolism_count
+    global tick_combat_income, tick_parasitism_income, tick_total_combats, tick_attacker_wins
+
+    species_id = []
+    invasiveness = []
+    mutation_rate = []
+    home_court_potency = []
+    basalmetabolicrate = []
+    offspring_energy_fraction = []
+    photosynthetic_ratio = []
+    spread_threshold = []
+    parasitism_rate = []
+    species_color = {}
+
+    Alive = []
+    Energy = []
+    tile_of = []
+    Age = []
+    alive_indices = set()
+    free_slot = []
+    pending_births = {}
+
+    World = [None] * (Width * Width)
+    spatial_occupancy = {}
+    light_map = [max_sunenergy] * (Width * Width)
+    Nutrient_map = [50.0] * (Width * Width)
+
+    history_population = []
+    history_total_energy = []
+    history_avg_photosynthesis = []
+    history_avg_defense = []
+    history_avg_age = []
+    history_avg_invasiveness = []
+    history_avg_parasitism = []
+    history_avg_gain = []
+    history_avg_bmr = []
+    history_combat_income = []
+    history_species_richness = []
+    history_shannon_diversity = []
+    history_evenness = []
+    history_age_structure = []
+    history_energy_gini = []
+    history_territory_stability = []
+    history_trait_investment = []
+    history_trait_corr = []
+    history_attacker_win_rate = []
+    history_para_photo_ratio = []
+    history_unreachable_spread_ratio = []
+
+    best_organism_ever = {
+        'energy': 0,
+        'age': 0,
+        'energy_record_holder': None,
+        'age_record_holder': None
+    }
+    current_best = {
+        'energy': 0,
+        'age': 0,
+        'energy_index': None,
+        'age_index': None
+    }
+    next_speciesID = 0
+    parent_registry = {}
+    previous_tile_species = [None] * (Width * Width)
+
+    tick_total_gain = 0.0
+    tick_total_bmr = 0.0
+    tick_metabolism_count = 0
+    tick_combat_income = 0.0
+    tick_parasitism_income = 0.0
+    tick_total_combats = 0
+    tick_attacker_wins = 0
+
+    current_run_frames = []
+    current_capture_step = 0
+    replay_mode = False
+    replay_run_index = -1
+    replay_frame_index = 0
+    replay_playing = True
+    if clear_run_data:
+        run_archive = []
+
+
 # endregion
 
 
@@ -471,7 +692,7 @@ def kill_organism(i,return_energy = True):
 
     if return_energy:
         death_e = Energy[i]
-        Energy_map[victim_tile] += death_e * 0.4  # 40% as light intensity
+        light_map[victim_tile] += death_e * 0.4  # 40% as light intensity
         Nutrient_map[victim_tile] += death_e * nutrient_from_death_ratio  # 8% as nutrients
         # 52% lost to decomposition inefficiency
 
@@ -562,7 +783,7 @@ def calculate_size_based_max_energy(i):
     spread_norm = spread_threshold[i] / max(initial_energy * 5.0, 1.0)
 
     size_factor = (
-        0.35
+        1.00
         + (1.00 * d)
         + (0.25 * p)
         + (0.40 * inv)
@@ -571,7 +792,8 @@ def calculate_size_based_max_energy(i):
         + (0.20 * off)
         - (0.15 * mut)
     )
-    size_factor = max(0.20, min(3.20, size_factor))
+    # Keep storage physically sensible: never below initial energy budget.
+    size_factor = max(1.00, min(3.20, size_factor))
     return initial_energy * size_factor
 
 def handle_overflow(i):
@@ -586,10 +808,10 @@ def handle_overflow(i):
         neighbors = find_neighbour1D(tile_of[i])
         per_neighbor = overflow / len(neighbors)
         for n_tile in neighbors:
-            Energy_map[n_tile] += per_neighbor
+            light_map[n_tile] += per_neighbor
 
 def calculate_energychange(i):
-    global Energy_map, Nutrient_map, Energy, tick_total_gain, tick_total_bmr, tick_metabolism_count
+    global light_map, Nutrient_map, Energy, tick_total_gain, tick_total_bmr, tick_metabolism_count
 
     tile = tile_of[i]
     photo = photosynthetic_ratio[i]
@@ -697,7 +919,7 @@ def update_energy_map():
             light_map[i] -= excess * 0.15  # 15% dissipation
 
         # Hard cap at maximum intensity
-        light_map[i] = min(Energy_map[i], max_tile_light)
+        light_map[i] = min(light_map[i], max_tile_light)
         
         # === NUTRIENT REGENERATION ===
         Nutrient_map[i] = min(Nutrient_map[i] + nutrient_regen_rate, 100.0)
@@ -884,7 +1106,7 @@ def spread_logic():
                 reward_for_win = 0 
                 offspring_e = Energy[winner] * offspring_energy_fraction[winner]
                 for loser in organism_indexes:
-                    if loser is not winner:                    
+                    if loser != winner:                    
                         reward_for_win += calc_winner_e(loser,winner)
                 #editting this for smoother dynamic
                 # reward_for_win += Energy[defender] * aggresion_reward
@@ -1058,16 +1280,17 @@ def compute_observations(living, include_trait_corr=True):
 #visualisations
 # region Visualization
 import tkinter as tk
+from tkinter import scrolledtext
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import numpy as np
 
 def setup_visualization():
-    global main_window, grid_window, canvas, grid_canvas, im, e_im, biome_im
-    global grid_ax, e_map_ax, biome_ax, obs_ax, corr_ax, energy_ax, trait_ax, age_ax
+    global main_window, grid_window, canvas, grid_canvas, im, e_im, nutr_im, biome_im
+    global grid_ax, e_map_ax, nutr_map_ax, biome_ax, obs_ax, corr_ax, energy_ax, trait_ax, age_ax
     global energy_line, photo_line, defense_line, invasive_line, parasite_line, trait_invest_line
     global gini_line, stability_line, attacker_line, para_photo_line, corr_im
-    global age_lines, stats_text, debug_text
+    global age_bars, stats_scroll, debug_text
     # main window for graphs
     main_window = tk.Tk()
     main_window.title("Statistics")
@@ -1079,21 +1302,26 @@ def setup_visualization():
     # grid_window.state('zoomed')
     
     # grid figure in its own window
-    grid_fig = Figure(figsize=(15, 5))
-    grid_ax = grid_fig.add_subplot(131)
-    e_map_ax = grid_fig.add_subplot(132)
-    biome_ax = grid_fig.add_subplot(133)
+    grid_fig = Figure(figsize=(20, 5))
+    grid_ax = grid_fig.add_subplot(141)
+    e_map_ax = grid_fig.add_subplot(142)
+    nutr_map_ax = grid_fig.add_subplot(143)
+    biome_ax = grid_fig.add_subplot(144)
     grid_ax.axis('off')
     e_map_ax.axis('off')
+    nutr_map_ax.axis('off')
     biome_ax.axis('off')
     grid_ax.set_title("Organisms")
-    e_map_ax.set_title("Energy Map")
+    e_map_ax.set_title("Energy/Light Map")
+    nutr_map_ax.set_title("Nutrient Map")
     biome_ax.set_title("Ecological Guilds")
     world_array = np.zeros((Width, Width, 3))
     e_map_arr = np.zeros((Width, Width))
+    nutr_arr = np.zeros((Width, Width))
     biome_arr = np.zeros((Width, Width, 3))
     im = grid_ax.imshow(world_array, interpolation='nearest')
     e_im = e_map_ax.imshow(e_map_arr, vmin=0, vmax=1, cmap='magma', interpolation='nearest')
+    nutr_im = nutr_map_ax.imshow(nutr_arr, vmin=0, vmax=1, cmap='viridis', interpolation='nearest')
     biome_im = biome_ax.imshow(biome_arr, interpolation='nearest')
 
     # Guild legend (on-screen)
@@ -1154,26 +1382,32 @@ def setup_visualization():
     trait_ax.set_xlabel("Tick")
     trait_ax.set_ylabel("Trait Value")
 
-    # Stats and debug text
+    # Stats and debug panel
     stats_ax = fig.add_subplot(2, 3, 3)
-    stats_ax.set_title("Records / Health / Last Tick")
-    stats_ax.axis('off')  # Hide axes for text display
-    stats_text = stats_ax.text(0.05, 0.95, '', transform=stats_ax.transAxes,
-                            fontsize=7, verticalalignment='top', family='monospace',
-                            clip_on=True)
+    stats_ax.set_title("Record/Health Text")
+    stats_ax.axis('off')
+    stats_ax.text(
+        0.05, 0.95,
+        "Long records text is in the right panel.\n"
+        "Debug text is shown below in this panel.",
+        transform=stats_ax.transAxes,
+        fontsize=9,
+        verticalalignment='top'
+    )
+    debug_text = stats_ax.text(
+        0.05, 0.05, '',
+        transform=stats_ax.transAxes,
+        fontsize=7,
+        verticalalignment='bottom',
+        family='monospace',
+        clip_on=True
+    )
+    debug_text.set_clip_path(stats_ax.patch)
 
     age_ax = fig.add_subplot(2, 3, 6)
-    age_ax.set_title("Age Structure Distribution")
-    age_ax.set_xlabel("Tick")
+    age_ax.set_title("Age Structure Histogram")
+    age_ax.set_xlabel("Age Bracket")
     age_ax.set_ylabel("Fraction")
-
-    debug_ax = stats_ax
-    debug_ax.axis('off')
-    debug_text = debug_ax.text(0.05, 0.05, '', transform=debug_ax.transAxes,
-                            fontsize=7, verticalalignment='top', family='monospace',
-                            clip_on=True)
-    stats_text.set_clip_path(stats_ax.patch)
-    debug_text.set_clip_path(debug_ax.patch)
     
     photo_line, = trait_ax.plot([], [], 'g-', label='Photosynthesis')
     defense_line, = trait_ax.plot([], [], 'b-', label='Defense')
@@ -1182,13 +1416,16 @@ def setup_visualization():
     trait_invest_line, = trait_ax.plot([], [], color='orange', label='Trait Investment')
     trait_ax.legend()
 
-    age_lines = []
     age_colors = ['#4daf4a', '#377eb8', '#984ea3', '#ff7f00', '#a65628']
-    for i, (lo, hi) in enumerate(age_bins):
-        label = f"{lo}-{hi-1}" if hi is not None else f"{lo}+"
-        line, = age_ax.plot([], [], color=age_colors[i % len(age_colors)], label=label)
-        age_lines.append(line)
-    age_ax.legend(fontsize=8)
+    age_labels = [f"{lo}-{hi-1}" for lo, hi in age_bins]
+    age_bars = age_ax.bar(
+        range(len(age_bins)),
+        [0.0] * len(age_bins),
+        color=[age_colors[i % len(age_colors)] for i in range(len(age_bins))]
+    )
+    age_ax.set_xticks(range(len(age_bins)))
+    age_ax.set_xticklabels(age_labels, rotation=25, ha='right')
+    age_ax.set_ylim(0, 1.0)
     
     obs_ax.grid(True, alpha=0.3)
     energy_ax.grid(True, alpha=0.3)
@@ -1197,8 +1434,24 @@ def setup_visualization():
 
     fig.tight_layout()  # automatically adjust spacing
     
-    canvas = FigureCanvasTkAgg(fig, master=main_window)
-    canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)  # fill window
+    content_frame = tk.Frame(main_window)
+    content_frame.pack(fill=tk.BOTH, expand=True)
+
+    plot_frame = tk.Frame(content_frame)
+    plot_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+
+    panel_frame = tk.Frame(content_frame, width=380)
+    panel_frame.pack(side=tk.RIGHT, fill=tk.Y)
+    panel_frame.pack_propagate(False)
+
+    canvas = FigureCanvasTkAgg(fig, master=plot_frame)
+    canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+
+    tk.Label(panel_frame, text="Records / Health", anchor='w',
+             font=('TkDefaultFont', 9, 'bold')).pack(fill=tk.X, padx=6, pady=(6, 2))
+    stats_scroll = scrolledtext.ScrolledText(panel_frame, wrap=tk.WORD, height=22, font=('Consolas', 8))
+    stats_scroll.pack(fill=tk.BOTH, expand=True, padx=6, pady=(0, 6))
+    stats_scroll.configure(state=tk.DISABLED)
 
     # run archive/replay controls
     main_window.bind("<KeyPress-s>", on_save_run)
@@ -1208,6 +1461,19 @@ def setup_visualization():
     main_window.bind("<space>", on_toggle_replay_pause)
     main_window.bind("<Left>", on_replay_prev_frame)
     main_window.bind("<Right>", on_replay_next_frame)
+
+
+def set_scroll_text(widget, value):
+    if widget is None:
+        return
+    yview = widget.yview()
+    widget.configure(state=tk.NORMAL)
+    widget.delete("1.0", tk.END)
+    widget.insert(tk.END, value)
+    widget.configure(state=tk.DISABLED)
+    if yview:
+        widget.yview_moveto(yview[0])
+
 
 def downsample(data , max_points = 2000):#reads the data in steps to reduce number of datapoints plotted
     if len(data) <= max_points:
@@ -1239,6 +1505,7 @@ def get_species_rgb(species_id, age, max_age):
 def build_spatial_layers():
     world_array = np.zeros((Width, Width, 3), dtype=np.float32)
     energy_map_arr = np.zeros((Width, Width), dtype=np.float32)
+    nutrient_map_arr = np.zeros((Width, Width), dtype=np.float32)
     biome_map_arr = np.zeros((Width, Width, 3), dtype=np.float32)
 
     guild_base_colors = {
@@ -1266,11 +1533,13 @@ def build_spatial_layers():
         x, y = convert_to2D(i)
         denom = (base_tile_energy * 1.05) if base_tile_energy > 0 else 1.0
         energy_map_arr[y][x] = light_map[i] / denom
+        nutrient_map_arr[y][x] = Nutrient_map[i] / 100.0
 
     world_array = np.clip(world_array, 0, 1)
     energy_map_arr = np.clip(energy_map_arr, 0, 1)
+    nutrient_map_arr = np.clip(nutrient_map_arr, 0, 1)
     biome_map_arr = np.clip(biome_map_arr, 0, 1)
-    return world_array, energy_map_arr, biome_map_arr
+    return world_array, energy_map_arr, nutrient_map_arr, biome_map_arr
 # endregion
 # endregion
 
@@ -1286,18 +1555,19 @@ def will_capture_frame_on_this_tick():
     return ((current_capture_step + 1) % FRAME_CAPTURE_STRIDE) == 0
 
 
-def capture_run_frame(world_array=None, energy_map_arr=None, biome_map_arr=None):
+def capture_run_frame(world_array=None, energy_map_arr=None, nutrient_map_arr=None, biome_map_arr=None):
     global current_capture_step, current_run_frames
     current_capture_step += 1
     if current_capture_step % FRAME_CAPTURE_STRIDE != 0:
         return False
 
-    if world_array is None or energy_map_arr is None or biome_map_arr is None:
-        world_array, energy_map_arr, biome_map_arr = build_spatial_layers()
+    if world_array is None or energy_map_arr is None or nutrient_map_arr is None or biome_map_arr is None:
+        world_array, energy_map_arr, nutrient_map_arr, biome_map_arr = build_spatial_layers()
 
     frame = {
         "world": (world_array * 255).astype(np.uint8),
         "energy": energy_map_arr.astype(np.float16),
+        "nutrient": nutrient_map_arr.astype(np.float16),
         "biome": (biome_map_arr * 255).astype(np.uint8),
         "hist_idx": max(0, len(history_population) - 1),
         "stats_text": generate_stats_text(),
@@ -1335,6 +1605,7 @@ def save_current_run(label=None):
             "species_richness": history_species_richness[:],
             "shannon": history_shannon_diversity[:],
             "evenness": history_evenness[:],
+            "unreachable_spread_ratio": history_unreachable_spread_ratio[:],
         }
     })
     if len(run_archive) > MAX_ARCHIVED_RUNS:
@@ -1402,7 +1673,9 @@ def estimate_memory_sinks():
 
     frame_bytes = 0
     for frame in current_run_frames:
-        frame_bytes += frame["world"].nbytes + frame["energy"].nbytes + frame["biome"].nbytes
+        nutrient_arr = frame.get("nutrient")
+        nutrient_bytes = nutrient_arr.nbytes if nutrient_arr is not None else 0
+        frame_bytes += frame["world"].nbytes + frame["energy"].nbytes + nutrient_bytes + frame["biome"].nbytes
     details["current_run_frames_arrays"] = frame_bytes
     details["run_archive_container"] = sys.getsizeof(run_archive)
     details["species_color_dict"] = sys.getsizeof(species_color)
@@ -1598,6 +1871,11 @@ def render_replay_frame():
 
     im.set_data(frame["world"])
     e_im.set_data(frame["energy"].astype(np.float32))
+    nutrient_frame = frame.get("nutrient")
+    if nutrient_frame is not None:
+        nutr_im.set_data(nutrient_frame.astype(np.float32))
+    else:
+        nutr_im.set_data(np.zeros((Width, Width), dtype=np.float32))
     biome_im.set_data(frame["biome"])
 
     hist = run["histories"]
@@ -1616,22 +1894,23 @@ def render_replay_frame():
     if corr_frames:
         corr_im.set_data(corr_frames[min(hi, len(corr_frames) - 1)])
     age_struct_series = hist.get("age_structure", [])
-    for idx, line in enumerate(age_lines):
-        vals = [row[idx] for row in age_struct_series[:hi + 1]] if age_struct_series else []
-        x, y = downsample(vals)
-        line.set_data(x, y)
+    age_values = age_struct_series[min(hi, len(age_struct_series) - 1)] if age_struct_series else [0.0] * len(age_bins)
+    for idx, bar in enumerate(age_bars):
+        bar.set_height(age_values[idx] if idx < len(age_values) else 0.0)
+    max_age_val = max(age_values) if age_values else 0.0
+    age_ax.set_ylim(0, max(0.05, min(1.0, max_age_val * 1.25 + 0.02)))
 
-    stats_text.set_text(frame["stats_text"])
-    debug_text.set_text(
-        frame["debug_text"]
+    set_scroll_text(stats_scroll, frame.get("stats_text", ""))
+    replay_debug_text = (
+        frame.get("debug_text", "")
         + f"\nPopulation: {hist['population'][min(hi, len(hist['population'])-1)]}"
-        + f"\n\n=== REPLAY ===\nRun: {run['name']}\nFrame: {replay_frame_index + 1}/{len(frames)}"
+        + f"\n=== REPLAY ===\nRun: {run['name']}\nFrame: {replay_frame_index + 1}/{len(frames)}"
     )
+    debug_text.set_text(replay_debug_text)
 
     obs_ax.relim(); obs_ax.autoscale_view()
     energy_ax.relim(); energy_ax.autoscale_view()
     trait_ax.relim(); trait_ax.autoscale_view()
-    age_ax.relim(); age_ax.autoscale_view()
     grid_canvas.draw()
     canvas.draw()
 
@@ -1669,11 +1948,31 @@ def on_load_latest_saved_run(event=None):
 
 
 def start_replay_from_disk(path=None):
+    if isinstance(path, str):
+        path = path.strip().strip('"').strip("'")
+        path = os.path.normpath(path) if path else None
+
     if path is None:
         run_data, loaded_path = load_latest_run_from_disk()
     else:
-        run_data = load_run_from_disk(path)
-        loaded_path = path
+        candidate_paths = []
+        candidate_paths.append(path)
+        # Common convenience: allow bare filename, script-relative path, or saved_runs-relative path.
+        candidate_paths.append(os.path.join(os.path.dirname(__file__), path))
+        candidate_paths.append(os.path.join(runs_dir, os.path.basename(path)))
+
+        resolved_path = None
+        for candidate in candidate_paths:
+            normalized = os.path.normpath(candidate)
+            if os.path.exists(normalized):
+                resolved_path = normalized
+                break
+
+        if resolved_path is None:
+            print(f"[startup] replay path not found: {path}")
+            return False
+        run_data = load_run_from_disk(resolved_path)
+        loaded_path = resolved_path
 
     if run_data is None:
         print("[startup] no saved runs found on disk")
@@ -1739,11 +2038,11 @@ def run_headless_simulation(total_ticks):
             capture_frame_ms = 0.0
             if will_capture_frame_on_this_tick():
                 build_start = time.perf_counter()
-                world_array, energy_map_arr, biome_map_arr = build_spatial_layers()
+                world_array, energy_map_arr, nutrient_map_arr, biome_map_arr = build_spatial_layers()
                 build_layers_ms = (time.perf_counter() - build_start) * 1000
 
                 cap_start = time.perf_counter()
-                capture_run_frame(world_array, energy_map_arr, biome_map_arr)
+                capture_run_frame(world_array, energy_map_arr, nutrient_map_arr, biome_map_arr)
                 capture_frame_ms = (time.perf_counter() - cap_start) * 1000
             else:
                 capture_run_frame()
@@ -1759,6 +2058,7 @@ def run_headless_simulation(total_ticks):
                 "territory_stability": float(history_territory_stability[-1]),
                 "attacker_win_rate": float(history_attacker_win_rate[-1]),
                 "para_photo_ratio": float(history_para_photo_ratio[-1]),
+                "unreachable_spread_ratio": float(history_unreachable_spread_ratio[-1]),
                 "timing_ms": {
                     "instance": float(tick_phase_instance_ms),
                     "spread": float(tick_phase_spread_ms),
@@ -1778,8 +2078,8 @@ def run_headless_simulation(total_ticks):
         else:
             collect_statistics()
             if will_capture_frame_on_this_tick():
-                world_array, energy_map_arr, biome_map_arr = build_spatial_layers()
-                capture_run_frame(world_array, energy_map_arr, biome_map_arr)
+                world_array, energy_map_arr, nutrient_map_arr, biome_map_arr = build_spatial_layers()
+                capture_run_frame(world_array, energy_map_arr, nutrient_map_arr, biome_map_arr)
             else:
                 capture_run_frame()
 
@@ -1850,6 +2150,15 @@ def collect_statistics():
         history_avg_bmr.append(0)
     history_combat_income.append(tick_combat_income)
 
+    if living_count:
+        unreachable_count = 0
+        for i in living:
+            if spread_threshold[i] > calculate_size_based_max_energy(i):
+                unreachable_count += 1
+        history_unreachable_spread_ratio.append(unreachable_count / living_count)
+    else:
+        history_unreachable_spread_ratio.append(0.0)
+
     include_trait_corr = ((len(history_population) - 1) % TRAIT_CORR_STRIDE) == 0
     obs = compute_observations(living, include_trait_corr=include_trait_corr)
     history_species_richness.append(obs["richness"])
@@ -1875,6 +2184,7 @@ def trim_history():
     global history_species_richness, history_shannon_diversity, history_evenness
     global history_age_structure, history_energy_gini, history_territory_stability
     global history_trait_investment, history_trait_corr, history_attacker_win_rate, history_para_photo_ratio
+    global history_unreachable_spread_ratio
 
     if len(history_population) > MAX_HISTORY:
         trim = len(history_population) - MAX_HISTORY
@@ -1899,6 +2209,7 @@ def trim_history():
         history_trait_corr = history_trait_corr[trim:]
         history_attacker_win_rate = history_attacker_win_rate[trim:]
         history_para_photo_ratio = history_para_photo_ratio[trim:]
+        history_unreachable_spread_ratio = history_unreachable_spread_ratio[trim:]
 
 
 def generate_stats_text():
@@ -1959,19 +2270,21 @@ def generate_debug_text():
     invest = history_trait_investment[-1] if history_trait_investment else 0
     attacker_wr = history_attacker_win_rate[-1] if history_attacker_win_rate else 0
     para_photo_ratio = history_para_photo_ratio[-1] if history_para_photo_ratio else 0
+    unreachable_ratio = history_unreachable_spread_ratio[-1] if history_unreachable_spread_ratio else 0
     age_struct = history_age_structure[-1] if history_age_structure else [0] * len(age_bins)
 
     text = "=== ENERGY FLOW (LAST TICK) ===\n"
     text += f"Avg Gain/Org: {avg_gain:.3f}\n"
-    text += f"Avg BMR/Org:  {avg_bmr:.3f}\n"
+    text += f"Avg BMR/Org: {avg_bmr:.3f}\n"
     text += f"Combat Income: {combat_income:.3f}\n"
-    text += f"Net (Gain-BMR): {(avg_gain - avg_bmr):.3f}\n\n"
+    text += f"Net (Gain-BMR): {(avg_gain - avg_bmr):.3f}\n"
     text += "=== OBSERVATIONS (LAST TICK) ===\n"
     text += f"Richness: {richness}  Shannon: {shannon:.2f}  Evenness: {evenness:.2f}\n"
     text += f"Energy Gini: {gini:.2f}  Territory Stability: {stability:.2f}\n"
     text += f"Trait Investment Avg: {invest:.2f}\n"
     text += f"Attacker Win Rate: {attacker_wr:.2f}\n"
     text += f"Parasitism/Photosynthesis: {para_photo_ratio:.2f}\n"
+    text += f"Unreachable Spread %: {unreachable_ratio * 100:.2f}%\n"
     age_labels = []
     for i, (lo, hi) in enumerate(age_bins):
         label = f"{lo}-{hi-1}" if hi is not None else f"{lo}+"
@@ -1988,8 +2301,7 @@ def generate_debug_text():
 def start():
     apply_environment_preset(ENVIRONMENT_PRESET)
     build_neighbor_cache()
-    spatial_occupancy.clear()
-    reset_energy_map()
+    reset_simulation_state(clear_run_data=False)
     initialize(initial_organism_count)
     run_outputs = run_headless_simulation(run_ticks)
     print(f"[simulation complete] ticks={run_ticks}")
@@ -2037,10 +2349,14 @@ def build_neighbor_cache():
 
 # region Entrypoint
 STARTUP_MODE = "simulate"  # "simulate" or "replay_latest"
+STARTUP_REPLAY_PATH = "run_20000ticks_20260223_161557.pkl"  # Optional .pkl path. None means load newest run file.
 
 if __name__ == "__main__":
     if STARTUP_MODE == "replay_latest":
-        if start_replay_from_disk():
+        if start_replay_from_disk(STARTUP_REPLAY_PATH):
+            main_window.mainloop()
+    elif isinstance(STARTUP_MODE, str) and STARTUP_MODE.lower().endswith(".pkl"):
+        if start_replay_from_disk(STARTUP_MODE):
             main_window.mainloop()
     else:
         start()
