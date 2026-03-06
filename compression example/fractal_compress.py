@@ -2,6 +2,8 @@ import numpy as np
 from PIL import Image
 import math
 import time
+import multiprocessing as mp
+from multiprocessing import Pool, cpu_count
 
 # ==============================================================================
 # OVERVIEW — WHAT THIS FILE DOES
@@ -181,116 +183,176 @@ def block_error(domain: np.ndarray, range_block: np.ndarray,
 
 
 # ==============================================================================
-# PART 3 — FRACTAL ENCODER (ANYTIME ALGORITHM)
+# PART 3 — FRACTAL ENCODER (PARALLEL + EARLY STOPPING + ANYTIME)
 #
 # For every 8×8 range block in the image, finds the 16×16 domain block
-# (anywhere in the image) that — after downscaling, transforming, and
-# adjusting brightness/contrast — best approximates that range block.
+# that best approximates it after downscaling + transform + brightness fit.
 #
-# ANYTIME BEHAVIOUR:
-#   The encoder tracks time spent vs time budget.
-#   Early on it tries all 8 geometric transforms per domain block.
-#   As time runs low it drops to fewer transforms to finish in budget.
-#   You can always interrupt it — whatever transforms are stored so far
-#   produce a valid (if imperfect) compressed image.
+# THREE OPTIMISATIONS ADDED:
+#
+# 1. PARALLELISM — Python's GIL (Global Interpreter Lock) blocks true thread
+#    parallelism for CPU work. We use multiprocessing.Pool instead, which
+#    spawns separate OS processes each with their own Python interpreter.
+#    Each worker gets a chunk of range blocks and searches independently.
+#    No block depends on any other block during encoding so this is safe.
+#    Speedup scales roughly linearly with CPU core count.
+#
+# 2. EARLY STOPPING — If a match is found with error below ERROR_THRESHOLD,
+#    we stop searching immediately and move to the next range block.
+#    Rationale: human eyes cannot detect errors below a certain MSE level.
+#    Any match below that threshold is perceptually perfect — searching
+#    further wastes time finding an imperceptibly better match.
+#    ERROR_THRESHOLD = 0 means only stop on a perfect match.
+#    ERROR_THRESHOLD = 50 means stop when "good enough" visually.
+#
+# 3. ANYTIME — Time budget still controls transform count per block.
+#    If time is running low, try fewer transforms to finish on schedule.
 #
 # WHAT GETS STORED PER BLOCK (13 bytes):
-#   domain_y   uint16  — row of the domain block in the image
-#   domain_x   uint16  — column of the domain block in the image
+#   domain_y   uint16  — row of the domain block
+#   domain_x   uint16  — column of the domain block
 #   transform  uint8   — which of the 8 geometric transforms to apply
 #   contrast   float32 — brightness scaling factor
 #   brightness float32 — brightness offset
 # ==============================================================================
 
-def encode_fractal(channel: np.ndarray, time_budget: float = 60.0) -> list:
-    """
-    Encodes a single greyscale channel using fractal (IFS) compression.
+# Error threshold for early stopping.
+# MSE below this is considered perceptually perfect — stop searching.
+# 0   = only stop on exact match (strictest)
+# 50  = stop when visually indistinguishable (recommended)
+# 200 = stop quickly, accept more visible block artifacts
+ERROR_THRESHOLD = 50.0
 
-    Args:
-        channel:     2D uint8 array — one channel of the YCbCr image (usually Y)
-        time_budget: seconds to spend encoding. More time = better quality.
-                     30s gives rough results, 300s gives good results.
+
+def _encode_block_range(args):
+    """
+    Worker function — encodes a subset of range blocks independently.
+    Must be a module-level function (not a lambda or nested function)
+    so that multiprocessing can pickle and send it to worker processes.
+
+    Args (packed as a single tuple because Pool.map passes one argument):
+        block_coords  — list of (ry, rx) positions this worker handles
+        ch            — the full channel as a float32 array
+        domain_pool   — precomputed list of (dy, dx, downsampled_block)
+        n_transforms  — how many transforms to try (1–8, set by time budget)
 
     Returns:
-        List of transforms, one per range block. Each transform is a tuple:
-        (domain_y, domain_x, transform_idx, contrast, brightness)
+        List of transforms (dy, dx, ti, contrast, brightness) in order,
+        plus a count of how many blocks were early-stopped.
+    """
+    block_coords, ch, domain_pool, n_transforms = args
+    results      = []
+    early_stops  = 0
+
+    for ry, rx in block_coords:
+        range_block = ch[ry:ry + BLOCK_SIZE, rx:rx + BLOCK_SIZE]
+        best_error     = float('inf')
+        best_transform = (0, 0, 0, 0.0, 128.0)
+        stopped_early  = False
+
+        for dy, dx, domain_base in domain_pool:
+            for ti in range(n_transforms):
+                domain_t   = apply_geometric_transform(domain_base, ti)
+                c, b       = fit_brightness_contrast(domain_t, range_block)
+                err        = block_error(domain_t, range_block, c, b)
+
+                if err < best_error:
+                    best_error     = err
+                    best_transform = (dy, dx, ti, c, b)
+
+                # Early stop — this match is perceptually perfect, no need
+                # to search further. Jump straight to the next range block.
+                if best_error <= ERROR_THRESHOLD:
+                    stopped_early = True
+                    break
+
+            if stopped_early:
+                early_stops += 1
+                break
+
+        results.append(best_transform)
+
+    return results, early_stops
+
+
+def encode_fractal(channel: np.ndarray, time_budget: float = 60.0) -> list:
+    """
+    Encodes a single greyscale channel using parallel fractal compression.
+
+    Automatically detects available CPU cores and distributes range blocks
+    evenly across them. Each core searches its chunk independently.
+
+    Args:
+        channel:     2D uint8 array (Y channel of YCbCr image)
+        time_budget: seconds budget — more time = more transforms tried per block
+
+    Returns:
+        Ordered list of transforms, one per range block.
     """
     H, W = channel.shape
     ch   = channel.astype(np.float32)
 
     # ── Precompute all domain blocks ──────────────────────────────────────────
-    # Domain blocks are 16×16, stepped by BLOCK_SIZE so they cover the image.
-    # We downsample each to 8×8 immediately — no need to redo this per range block.
+    # Done once here in the main process, then shared (read-only) to workers.
+    # Downsampling here avoids repeating it for every range block in every worker.
     print("    Precomputing domain blocks...")
-    domain_pool = []   # list of (dy, dx, downsampled_8x8_block)
+    domain_pool = []
     for dy in range(0, H - DOMAIN_SIZE + 1, BLOCK_SIZE):
         for dx in range(0, W - DOMAIN_SIZE + 1, BLOCK_SIZE):
-            raw        = ch[dy:dy + DOMAIN_SIZE, dx:dx + DOMAIN_SIZE]
-            downsampled = downsample_2x(raw)
-            domain_pool.append((dy, dx, downsampled))
+            raw = ch[dy:dy + DOMAIN_SIZE, dx:dx + DOMAIN_SIZE]
+            domain_pool.append((dy, dx, downsample_2x(raw)))
 
-    n_domains    = len(domain_pool)
-    n_range_rows = (H) // BLOCK_SIZE
-    n_range_cols = (W) // BLOCK_SIZE
-    total_blocks = n_range_rows * n_range_cols
+    # ── Build full list of range block positions ──────────────────────────────
+    all_coords = [
+        (ry, rx)
+        for ry in range(0, H - BLOCK_SIZE + 1, BLOCK_SIZE)
+        for rx in range(0, W - BLOCK_SIZE + 1, BLOCK_SIZE)
+    ]
+    total_blocks = len(all_coords)
 
-    print(f"    {total_blocks} range blocks, {n_domains} domain blocks, "
-          f"{NUM_TRANSFORMS} transforms each")
-    print(f"    Time budget: {time_budget}s — quality improves until time runs out")
+    # ── Decide how many transforms to try based on time budget ───────────────
+    # Rough estimate: assume each comparison takes ~50μs in pure Python.
+    # Use this to figure out how many transforms per block fit in the budget.
+    n_cores    = cpu_count()
+    est_per_comparison = 50e-6           # seconds per single transform check
+    total_comparisons_if_full = total_blocks * len(domain_pool) * NUM_TRANSFORMS
+    est_full_time = total_comparisons_if_full * est_per_comparison / n_cores
+    # Scale transforms down proportionally if budget is smaller than full time
+    ratio = min(1.0, time_budget / max(est_full_time, 1e-9))
+    n_transforms = max(1, round(NUM_TRANSFORMS * ratio))
 
-    transforms = []
+    print(f"    {total_blocks} range blocks  |  {len(domain_pool)} domain blocks  "
+          f"|  {n_cores} CPU cores")
+    print(f"    Transforms per block: {n_transforms}/{NUM_TRANSFORMS}  "
+          f"(budget: {time_budget}s  |  early stop threshold MSE≤{ERROR_THRESHOLD})")
+
+    # ── Split range blocks evenly across cores ────────────────────────────────
+    # chunk_size = ceil(total / cores) so every core gets roughly equal work.
+    # The last chunk may be slightly smaller — that's fine.
+    chunk_size = math.ceil(total_blocks / n_cores)
+    chunks     = [all_coords[i:i + chunk_size] for i in range(0, total_blocks, chunk_size)]
+
+    # Pack arguments for each worker — Pool.map passes one argument per call
+    worker_args = [(chunk, ch, domain_pool, n_transforms) for chunk in chunks]
+
+    # ── Launch parallel workers ───────────────────────────────────────────────
+    # Pool spins up n_cores separate Python processes.
+    # map() blocks until ALL workers finish, then collects results in order.
+    # Results come back as [(transforms_list, early_stop_count), ...]
+    print(f"    Launching {n_cores} parallel workers...")
     start_time = time.time()
-    block_idx  = 0
 
-    for ry in range(0, H - BLOCK_SIZE + 1, BLOCK_SIZE):
-        for rx in range(0, W - BLOCK_SIZE + 1, BLOCK_SIZE):
-            range_block = ch[ry:ry + BLOCK_SIZE, rx:rx + BLOCK_SIZE]
+    with Pool(processes=n_cores) as pool:
+        results = pool.map(_encode_block_range, worker_args)
 
-            # ── Anytime transform count decision ─────────────────────────────
-            # Estimate how many transforms we can afford per domain block
-            # based on how much time is left and how many blocks remain.
-            elapsed        = time.time() - start_time
-            remaining      = time_budget - elapsed
-            blocks_left    = total_blocks - block_idx
-            # Avoid division by zero; default to trying all transforms if we
-            # have plenty of time, drop to 1 if we're running out
-            if blocks_left > 0 and elapsed > 0:
-                rate           = block_idx / elapsed          # blocks per second
-                time_per_block = 1.0 / rate if rate > 0 else remaining
-                transforms_affordable = max(1, min(
-                    NUM_TRANSFORMS,
-                    int(remaining / (blocks_left * time_per_block / NUM_TRANSFORMS))
-                ))
-            else:
-                transforms_affordable = NUM_TRANSFORMS
+    elapsed     = time.time() - start_time
+    # Flatten the per-chunk results back into one ordered list
+    transforms  = [t for chunk_results, _ in results for t in chunk_results]
+    early_stops = sum(count for _, count in results)
 
-            # ── Search for best matching domain block ─────────────────────────
-            best_error = float('inf')
-            best_transform = (0, 0, 0, 0.0, 128.0)
-
-            for dy, dx, domain_base in domain_pool:
-                for ti in range(transforms_affordable):
-                    # Apply geometric transform to the downsampled domain block
-                    domain_t = apply_geometric_transform(domain_base, ti)
-                    # Find best brightness/contrast to map domain → range
-                    c, b     = fit_brightness_contrast(domain_t, range_block)
-                    err      = block_error(domain_t, range_block, c, b)
-
-                    if err < best_error:
-                        best_error     = err
-                        best_transform = (dy, dx, ti, c, b)
-
-            transforms.append(best_transform)
-            block_idx += 1
-
-        # Print progress every row
-        elapsed  = time.time() - start_time
-        progress = block_idx / total_blocks * 100
-        print(f"    Progress: {progress:5.1f}%  |  elapsed: {elapsed:.1f}s  |  "
-              f"transforms tried: {transforms_affordable}/block", end='\r')
-
-    elapsed = time.time() - start_time
-    print(f"\n    Done. {total_blocks} blocks encoded in {elapsed:.1f}s")
+    print(f"    Done in {elapsed:.1f}s  |  "
+          f"early stops: {early_stops}/{total_blocks} "
+          f"({early_stops/total_blocks*100:.1f}% of blocks found good match instantly)")
     return transforms
 
 
@@ -506,7 +568,7 @@ def side_by_side(original: np.ndarray, reconstructed: np.ndarray) -> Image.Image
 
 if __name__ == "__main__":
     # ── Load image ─────────────────────────────────────────────────────────────
-    img = np.array(Image.open("compression example/picel world wallppar.png"))
+    img = np.array(Image.open("compression example/picel world wallppar.png").convert("RGB"))
     print(f"Image loaded: {img.shape[1]}×{img.shape[0]} px  |  {img.nbytes / 1024:.1f} KB raw")
 
     # ── Step 1: RGB → YCbCr ───────────────────────────────────────────────────
@@ -519,7 +581,7 @@ if __name__ == "__main__":
     # Y carries all the visual structure — edges, shapes, texture.
     # Fractal compression finds self-similar regions to describe it compactly.
     # Increase TIME_BUDGET for better quality (at the cost of encode time).
-    TIME_BUDGET = 60.0   # seconds — raise this for better quality
+    TIME_BUDGET = 10.0   # seconds — raise this for better quality
     print(f"\n[Step 2] Fractal encoding Y channel (budget: {TIME_BUDGET}s)...")
     y_transforms = encode_fractal(ycbcr[:, :, 0], time_budget=TIME_BUDGET)
 
